@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: daa5bf48169fabb4da16600dc64a0fc3, type: 3}
-  m_Name: Earth Node Source
+  m_Name: Trail Node Source
   m_EditorClassIdentifier: 
-  _nodeSprite: {fileID: 21300000, guid: 0346808cd472696438a6ec1184cf4e5d, type: 3}
-  _nodeState: 1
+  _nodeSprite: {fileID: 21300000, guid: ef7ce44a49fe8c240990a16dd78b20a8, type: 3}
+  _nodeState: 2

@@ -61,7 +61,7 @@ SpriteAtlas:
   m_PackedSpriteNamesToIndex:
   - SeaNodeSprite
   - PlayerSprite
-  - MarkedNode
+  - TrailNode
   - EarthNodeSprite
   - EnemySprite
   m_RenderDataMap: {}

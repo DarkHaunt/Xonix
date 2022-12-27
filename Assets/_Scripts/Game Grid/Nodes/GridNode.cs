@@ -1,11 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
 
 namespace Xonix.Grid
 {
+    using NodeState = GridNodeSource.NodeState;
+
     [RequireComponent(typeof(SpriteRenderer))]
     public class GridNode : MonoBehaviour
     {
@@ -15,6 +15,7 @@ namespace Xonix.Grid
 
 
         public Vector2 Position => transform.position;
+        public NodeState State => _nodeSource.State;
 
 
 
