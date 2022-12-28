@@ -25,6 +25,7 @@ namespace Xonix.Grid
 
 
         private readonly GridNode[,] _grid = new GridNode[LineCellsCount, ColumnCellsCount];
+        private readonly GridNode[,] _seaGrid;
 
         private GridNodeFactory _gridNodeFactory;
 
