@@ -8,7 +8,7 @@ namespace Xonix.Grid
     public class GridNodeSource : ScriptableObject
     {
         [SerializeField] private Sprite _nodeSprite;
-        [SerializeField] private NodeState _nodeState;
+        [SerializeField] private NodeState _nodeState = NodeState.Trail;
 
 
 

@@ -1,13 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Xonix.Grid;
+using Xonix.Trail;
 
 
 
 namespace Xonix.Entities
 {
+    using static GridNodeSource;
+    using static StaticData;
+
     public class Player : Entity
     {
+        [SerializeField] private GridNodeSource _trailNodeSource;
+
+        // Marks tiles as trailed
+        private TrailMarker _trailMarker;
+
+
         public override Vector3 MoveDirection
         {
             get
@@ -30,6 +39,26 @@ namespace Xonix.Entities
 
                 #endregion
             }
+        }
+
+
+
+        public override void Init()
+        {
+            _trailMarker = new TrailMarker(_trailNodeSource);
+        }
+
+        protected override void Move()
+        {
+            var movePosition = transform.position + (MoveDirection * CellSize);
+
+            if (!XonixGame.TryToGetNodeWithPosition(movePosition, out GridNode node))
+                return;
+
+            if (node.State == NodeState.Sea)
+                _trailMarker.MarkNodeAsTrail(node);
+
+            base.Move();
         }
     }
 }

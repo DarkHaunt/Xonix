@@ -22,6 +22,8 @@ namespace Xonix.Entities
 
 
 
+        public abstract void Init();
+
         protected virtual void Move() => transform.Translate(MoveDirection * CellSize);
 
         private IEnumerator MoveCoroutine()
@@ -38,6 +40,8 @@ namespace Xonix.Entities
 
         private void Start()
         {
+            Init();
+
             StartCoroutine(MoveCoroutine());
         }
 

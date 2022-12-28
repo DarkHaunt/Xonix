@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Sea Node Source
   m_EditorClassIdentifier: 
   _nodeSprite: {fileID: 21300000, guid: 13467c91bd21c354697a1daa3ef81170, type: 3}
+  _nodeState: 1

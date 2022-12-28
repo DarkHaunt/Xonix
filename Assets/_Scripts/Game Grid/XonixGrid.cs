@@ -42,8 +42,8 @@ namespace Xonix.Grid
 
         public bool TryToGetNode(Vector2 nodePosition, out GridNode node)
         {
-            var xIndex = (nodePosition.x == 0) ? 0 : ((int)nodePosition.x) - 1;
-            var yIndex = (nodePosition.y == 0) ? 0 : ((int)nodePosition.y) - 1;
+            var xIndex = (nodePosition.x == 0) ? 0 : ((int)(nodePosition.x / CellSize));
+            var yIndex = (nodePosition.y == 0) ? 0 : ((int)(nodePosition.y / CellSize));
 
             var isNodeOutOfIndex = yIndex < 0 || (yIndex > (ColumnCellsCount - 1)) || xIndex < 0 || (xIndex > (LineCellsCount - 1));
 
