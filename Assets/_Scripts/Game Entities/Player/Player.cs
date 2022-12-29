@@ -1,11 +1,12 @@
 using System.Collections.Generic;
-using UnityEngine;
-using Xonix.Grid;
+using System.Linq;
 using Xonix.Trail;
+using Xonix.Grid;
+using UnityEngine;
 
 
 
-namespace Xonix.Entities
+namespace Xonix.Entities.Player
 {
     using static GridNodeSource;
     using static StaticData;
@@ -13,11 +14,13 @@ namespace Xonix.Entities
     public class Player : Entity
     {
         [SerializeField] private GridNodeSource _trailNodeSource;
+        [SerializeField] private GridNodeSource _earthNodeSource;
 
         // Marks tiles as trailed
         private readonly Dictionary<GridNode, Direction> _nodesDirections = new Dictionary<GridNode, Direction>();
 
         private TrailMarker _trailMarker;
+        private Corrupter _corrupter;
         private bool _isTrailing = false;
 
 
@@ -51,6 +54,7 @@ namespace Xonix.Entities
         public override void Init()
         {
             _trailMarker = new TrailMarker(_trailNodeSource);
+            _corrupter = new Corrupter(_earthNodeSource);
         }
 
         protected override void Move()
@@ -99,16 +103,19 @@ namespace Xonix.Entities
             _isTrailing = false;
 
             GridNode firstNode = null;
-            foreach (var nodesDirection in _nodesDirections)
+            foreach (var node in _nodesDirections.Keys)
             {
                 if (firstNode == null)
-                    firstNode = nodesDirection.Key;
+                    firstNode = node;
 
+                _corrupter.CorruptNode(node);
+                
                 /*            print($"Node " + nodesDirection.Key + "   Direction " + nodesDirection.Value);
                             print($"Directions Perpendiculars  " + GetDirectionPerpendicularDirections(nodesDirection.Value));*/
             }
 
-            GetCorruptedPolygon(firstNode.Position, firstNode.Position + Vector2.left);
+           // GetCorruptedPolygon(firstNode.Position, firstNode.Position + Vector2.left);
+            GetCorruptedPolygon(firstNode.Position + Vector2.left);
 
             _nodesDirections.Clear();
         }
@@ -126,12 +133,13 @@ namespace Xonix.Entities
             #endif*/
         }
 
-        private List<Vector2> GetCorruptedPolygon(Vector2 startNodePosition, Vector2 firstPolygonNodePosition)
+        private List<Vector2> GetCorruptedPolygon(Vector2 seedPosition)
         {
             var polygon = new List<Vector2>();
 
-            var trackman = new Trackman(startNodePosition, firstPolygonNodePosition);
 
+
+            _corrupter.CorruptZone(seedPosition, XonixGame.SeaEnemies);
             /*
                         do
                         {
@@ -160,53 +168,6 @@ namespace Xonix.Entities
             public NodePolygon(IList<GridNode> vertices)
             {
                 _vertices = vertices as IReadOnlyList<GridNode>;
-            }
-        }
-
-        private struct Trackman
-        {
-            private Vector2 _leftHandPosition;
-            private Vector2 _position;
-
-            private Vector2 _currentWalkDirection;
-            private Vector2 _leftHandDirectionRelativelyToPosition;
-
-
-            public Vector2 Position => _position;
-            public Vector2 LeftHandPosition => _leftHandPosition;
-            public Vector2 WalkDirection => _currentWalkDirection;
-
-
-
-            public Trackman(Vector2 leftHandPosition, Vector2 position)
-            {
-                _leftHandPosition = leftHandPosition;
-                _position = position;
-
-                _leftHandDirectionRelativelyToPosition = (_leftHandPosition - _position).normalized;
-
-                var walkDirection = (_position - _leftHandPosition).normalized;
-                _currentWalkDirection = walkDirection.RotateVector2CounterClockwise();
-            }
-
-
-
-            public override string ToString() => $"Position = {Position} Hand Position = {LeftHandPosition} Nad dir {_leftHandDirectionRelativelyToPosition} Move direction = {WalkDirection}";
-
-            public void RotateClockwise()
-            {
-                _currentWalkDirection = _currentWalkDirection.RotateVector2Clockwise();
-                _leftHandDirectionRelativelyToPosition = _leftHandDirectionRelativelyToPosition.RotateVector2Clockwise();
-
-                _leftHandPosition = _position + (_leftHandDirectionRelativelyToPosition * CellSize);
-            }
-
-            public void RotateCounterClockwise()
-            {
-                _currentWalkDirection = _currentWalkDirection.RotateVector2CounterClockwise();
-                _leftHandDirectionRelativelyToPosition = _leftHandDirectionRelativelyToPosition.RotateVector2CounterClockwise();
-
-                _leftHandPosition = _position + (_leftHandDirectionRelativelyToPosition * CellSize);
             }
         }
     }

@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+
 
 
 
@@ -13,6 +15,7 @@ namespace Xonix.Grid
 
         private const float LineUnitSize = LineCellsCount * CellSize;
         private const float ColumnUnitSize = ColumnCellsCount * CellSize;
+        private const int FieldSize = LineCellsCount * ColumnCellsCount;
 
         private const float EarthInitBorderThickness = 2 * CellSize;
 
@@ -23,41 +26,18 @@ namespace Xonix.Grid
         [SerializeField] private GridNodeSource _earthNodeSource;
         [SerializeField] private Camera _mainCamera;
 
+        private readonly Dictionary<Vector2, GridNode> _grid = new Dictionary<Vector2, GridNode>(FieldSize);
+        private readonly Dictionary<Vector2, GridNode> _seaGrid = new Dictionary<Vector2, GridNode>();
 
-        private readonly GridNode[,] _grid = new GridNode[LineCellsCount, ColumnCellsCount];
-        private readonly GridNode[,] _seaGrid;
 
         private GridNodeFactory _gridNodeFactory;
 
 
 
-
-        /*        public GridNode GetNode(Vector2 nodePosition)
-                {
-                    var xIndex = (nodePosition.x == 0) ? 0 : ((int)nodePosition.x) - 1;
-                    var yIndex = (nodePosition.y == 0) ? 0 : ((int)nodePosition.y) - 1;
-
-
-                    return _grid[xIndex, yIndex];
-                }*/
-
-        public bool TryToGetNode(Vector2 nodePosition, out GridNode node)
+        public bool TryToGetNode(Vector2 position, out GridNode node)
         {
-            var xIndex = (nodePosition.x == 0) ? 0 : ((int)(nodePosition.x / CellSize));
-            var yIndex = (nodePosition.y == 0) ? 0 : ((int)(nodePosition.y / CellSize));
-
-            var isNodeOutOfIndex = yIndex < 0 || (yIndex > (ColumnCellsCount - 1)) || xIndex < 0 || (xIndex > (LineCellsCount - 1));
-
-            if (isNodeOutOfIndex)
-            {
-                node = null;
-                return false;
-            }
-
-            node = _grid[xIndex, yIndex];
-            return true;
+            return _grid.TryGetValue(position, out node);
         }
-
 
         private void Init()
         {
@@ -76,17 +56,28 @@ namespace Xonix.Grid
                 );
 
 
-            for (int x = 0; x < LineCellsCount; x++)
+            float x = 0f;
+            float y = 0f;
+
+            for (int i = 0; i < FieldSize; i++, x += CellSize)
             {
-                for (int y = 0; y < ColumnCellsCount; y++)
+                var nodePosition = new Vector2(x, y);
+                var currentNode = _gridNodeFactory.CreateGridNode(nodePosition);
+
+                var isInSeaInitArea = seaGridArea.IsPositionInArea(nodePosition);
+                var nodeSource = (isInSeaInitArea) ? _seaNodeSource : _earthNodeSource;
+
+                if (isInSeaInitArea)
+                    _seaGrid.Add(nodePosition, currentNode);
+
+                currentNode.SetSource(nodeSource);
+
+                _grid.Add(nodePosition, currentNode);
+
+                if (x == LineUnitSize - 1)
                 {
-                    var nodePosition = firstNodePosition + (new Vector2(x, y) * CellSize);
-
-                    _grid[x, y] = _gridNodeFactory.CreateGridNode(nodePosition);
-                    _grid[x, y].transform.SetParent(transform);
-
-                    var nodeSource = (seaGridArea.IsPositionInArea(nodePosition)) ? _seaNodeSource : _earthNodeSource;
-                    _grid[x, y].SetSource(nodeSource);
+                    x = -CellSize;
+                    y += CellSize;
                 }
             }
 
