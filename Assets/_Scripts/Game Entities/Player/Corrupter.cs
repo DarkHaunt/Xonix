@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Xonix.Grid;
@@ -10,6 +9,7 @@ namespace Xonix.Entities.Player
 {
     using static GridNodeSource;
     using static StaticData;
+
 
     public class Corrupter
     {
@@ -31,19 +31,19 @@ namespace Xonix.Entities.Player
 
 
 
-        public void CorruptZone(Vector2 seedNodePosition, IEnumerable<Enemy> enemies)
+        public void CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
         {
-            var nodes = new Stack<GridNode>();
-            var checkedPositions = new HashSet<Vector2>();
+            var uncheckedNodes = new Stack<GridNode>();
 
             var seedNode = GetNode(seedNodePosition);
-            nodes.Push(seedNode);
+            uncheckedNodes.Push(seedNode);
+
             Action onZoneFreeOfEnemies = null;
 
 
-            while (nodes.Count != 0)
+            while (uncheckedNodes.Count != 0)
             {
-                var currentPickedNode = nodes.Pop();
+                var currentPickedNode = uncheckedNodes.Pop();
 
                 if (checkedPositions.Contains(currentPickedNode.Position) ||
                     currentPickedNode.State == NodeState.Earth)
@@ -55,24 +55,35 @@ namespace Xonix.Entities.Player
                     onZoneFreeOfEnemies += () => CorruptNode(currentPickedNode);
 
                 foreach (var neighbourTemplate in _neighboursTemplates)
-                    nodes.Push(GetNode(currentPickedNode.Position + neighbourTemplate));
+                    uncheckedNodes.Push(GetNode(currentPickedNode.Position + neighbourTemplate));
             }
 
-            var nodesCount = checkedPositions.Count;
-            var enemiesPositions = GetEnemiesPositions(enemies);
-
-            checkedPositions.ExceptWith(enemiesPositions);
-
-            if (checkedPositions.Count == nodesCount)
+            if (IsEnemyInZone(checkedPositions))
             {
-                MonoBehaviour.print("Zone DON'T have an enemy");
+                MonoBehaviour.print($"Zone with start node pos {seedNodePosition} DON'T have an enemy");
                 onZoneFreeOfEnemies?.Invoke();
             }
             else
                 MonoBehaviour.print("Zone HAVE an enemy");
         }
 
-        public void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
+        public void CorruptNodes(IEnumerable<GridNode> nodes)
+        {
+            foreach (var node in nodes)
+                CorruptNode(node);
+        }
+
+        private bool IsEnemyInZone(ISet<Vector2> zoneNodesPositions)
+        {
+            var nodesCount = zoneNodesPositions.Count;
+            var enemiesPositions = GetEnemiesPositions();
+
+            zoneNodesPositions.ExceptWith(enemiesPositions);
+
+            return zoneNodesPositions.Count == nodesCount; // If not the same count of positions - enemies stay in the zone
+        }
+
+        private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
 
         private GridNode GetNode(Vector2 vector2)
         {
@@ -82,9 +93,9 @@ namespace Xonix.Entities.Player
             return node;
         }
 
-        private IEnumerable<Vector2> GetEnemiesPositions(IEnumerable<Enemy> enemies)
+        private IEnumerable<Vector2> GetEnemiesPositions()
         {
-            foreach (var enemy in enemies)
+            foreach (var enemy in XonixGame.SeaEnemies)
                 yield return enemy.Position;
         }
     }

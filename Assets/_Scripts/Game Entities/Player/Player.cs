@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Xonix.Trail;
 using Xonix.Grid;
 using UnityEngine;
@@ -16,8 +15,6 @@ namespace Xonix.Entities.Player
         [SerializeField] private GridNodeSource _trailNodeSource;
         [SerializeField] private GridNodeSource _earthNodeSource;
 
-        // Marks tiles as trailed
-        private readonly Dictionary<GridNode, Direction> _nodesDirections = new Dictionary<GridNode, Direction>();
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
@@ -90,9 +87,8 @@ namespace Xonix.Entities.Player
 
         private void OnSeaNodeStep(GridNode seaNode)
         {
-            _nodesDirections.Add(seaNode, MoveDirection);
             _isTrailing = true;
-            _trailMarker.MarkNodeAsTrail(seaNode);
+            _trailMarker.MarkNodeAsTrail(seaNode, MoveDirection);
         }
 
         private void OnEarthNodeStep()
@@ -102,22 +98,23 @@ namespace Xonix.Entities.Player
 
             _isTrailing = false;
 
-            GridNode firstNode = null;
-            foreach (var node in _nodesDirections.Keys)
+
+            // Corrupt trail node anyway
+            _corrupter.CorruptNodes(_trailMarker.TrailNodesDirections.Keys);
+
+            // Init a collection for remembering checked nodes
+            var checkedNodePositions = new HashSet<Vector2>();
+
+            foreach (var nodeDirection in _trailMarker.TrailNodesDirections)
             {
-                if (firstNode == null)
-                    firstNode = node;
+                var perpendicularDirections = GetDirectionPerpendicularDirections(nodeDirection.Value);
 
-                _corrupter.CorruptNode(node);
-                
-                /*            print($"Node " + nodesDirection.Key + "   Direction " + nodesDirection.Value);
-                            print($"Directions Perpendiculars  " + GetDirectionPerpendicularDirections(nodesDirection.Value));*/
+                var firstNeighborNodePosition = nodeDirection.Key.Position + perpendicularDirections.FirstDirectionPerpendicular;
+                var secondNeighborNodePosition = nodeDirection.Key.Position + perpendicularDirections.SecondDirectionPerpendicular;
+
+                _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
+                _corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions);
             }
-
-           // GetCorruptedPolygon(firstNode.Position, firstNode.Position + Vector2.left);
-            GetCorruptedPolygon(firstNode.Position + Vector2.left);
-
-            _nodesDirections.Clear();
         }
 
         private void OnTrailNodeStep()
@@ -132,31 +129,6 @@ namespace Xonix.Entities.Player
                         Application.Quit();
             #endif*/
         }
-
-        private List<Vector2> GetCorruptedPolygon(Vector2 seedPosition)
-        {
-            var polygon = new List<Vector2>();
-
-
-
-            _corrupter.CorruptZone(seedPosition, XonixGame.SeaEnemies);
-            /*
-                        do
-                        {
-                            var faceNodePosition = trackman.Position + trackman.WalkDirection * CellSize;
-
-                            if (!XonixGame.TryToGetNodeWithPosition(faceNodePosition, out GridNode faceNode))
-                                throw new UnityException($"Node with position {faceNodePosition} doesn't exist");
-
-                            if (faceNode.State == NodeState.Earth)
-
-
-
-                        } while (trackman.Position != startNodePosition);
-            */
-            return polygon;
-        }
-
 
 
 

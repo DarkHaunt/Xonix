@@ -34,10 +34,6 @@ namespace Xonix
             }
 
             _instance = this;
-
-/*            var enemy = new GameObject("TestEnemy").AddComponent<Enemy>();
-            enemy.transform.position = new Vector3(3f, 3f, -1f);
-            _enemies.Add(enemy);*/
         }
     }
 }
