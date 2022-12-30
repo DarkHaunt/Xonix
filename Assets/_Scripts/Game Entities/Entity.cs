@@ -20,18 +20,11 @@ namespace Xonix.Entities
 
         public Vector2 Position => transform.position;
 
-        public abstract Direction MoveDirection { get; }
-
 
 
         public abstract void Init();
 
-        protected virtual void Move()
-        {
-            var direction = GetDirectionValue(MoveDirection);
-
-            transform.Translate(direction * CellSize);
-        }
+        protected abstract void Move();
 
         private IEnumerator MoveCoroutine()
         {

@@ -22,7 +22,7 @@ namespace Xonix.Entities.Player
 
 
 
-        public override Direction MoveDirection
+        private Direction MoveDirection
         {
             get
             {
@@ -40,7 +40,8 @@ namespace Xonix.Entities.Player
                 if (Input.GetKey(KeyCode.A))
                     return Direction.Left;
 
-                return Direction.Zero;
+                // TODO: For test
+                return Direction.Top;
 
                 #endregion
             }
@@ -81,8 +82,7 @@ namespace Xonix.Entities.Player
                     break;
             }
 
-
-            base.Move();
+            transform.position = movePosition;
         }
 
         private void OnSeaNodeStep(GridNode seaNode)
@@ -98,19 +98,24 @@ namespace Xonix.Entities.Player
 
             _isTrailing = false;
 
+            CorruptZonesAttachedToTrail();
+        }
 
-            // Corrupt trail node anyway
+        private void CorruptZonesAttachedToTrail()
+        {
+            // Corrupt all trail nodes for first
             _corrupter.CorruptNodes(_trailMarker.TrailNodesDirections.Keys);
 
             // Init a collection for remembering checked nodes
             var checkedNodePositions = new HashSet<Vector2>();
 
-            foreach (var nodeDirection in _trailMarker.TrailNodesDirections)
-            {
-                var perpendicularDirections = GetDirectionPerpendicularDirections(nodeDirection.Value);
 
-                var firstNeighborNodePosition = nodeDirection.Key.Position + perpendicularDirections.FirstDirectionPerpendicular;
-                var secondNeighborNodePosition = nodeDirection.Key.Position + perpendicularDirections.SecondDirectionPerpendicular;
+            foreach (var nodeKeyDirectionValue in _trailMarker.TrailNodesDirections)
+            {
+                var nodeDirection = GetDirectionValue(nodeKeyDirectionValue.Value);
+
+                var firstNeighborNodePosition = nodeKeyDirectionValue.Key.Position + nodeDirection.RotateFor90DegreeClockwise();
+                var secondNeighborNodePosition = nodeKeyDirectionValue.Key.Position + nodeDirection.RotateFor90DegreeCounterClockwise();
 
                 _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
                 _corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions);

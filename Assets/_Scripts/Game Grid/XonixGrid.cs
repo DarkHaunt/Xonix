@@ -10,6 +10,8 @@ namespace Xonix.Grid
 
     public class XonixGrid : MonoBehaviour
     {
+        #region [Grid Init Parameters]
+
         private const int LineCellsCount = 30;
         private const int ColumnCellsCount = 20;
 
@@ -17,10 +19,10 @@ namespace Xonix.Grid
         private const float ColumnUnitSize = ColumnCellsCount * CellSize;
         private const int FieldSize = LineCellsCount * ColumnCellsCount;
 
-        private const float EarthInitBorderThickness = 2 * CellSize;
-
+        private const float EarthInitBorderThickness = 2 * CellSize; 
         private static readonly Vector2 EarthInitBorderAligment = new Vector2(EarthInitBorderThickness, EarthInitBorderThickness);
 
+        #endregion
 
         [SerializeField] private GridNodeSource _seaNodeSource;
         [SerializeField] private GridNodeSource _earthNodeSource;
@@ -37,6 +39,14 @@ namespace Xonix.Grid
         public bool TryToGetNode(Vector2 position, out GridNode node)
         {
             return _grid.TryGetValue(position, out node);
+        }
+
+        public GridNode GetNode(Vector2 nodePosition)
+        {
+            if (!_grid.TryGetValue(nodePosition, out GridNode node))
+                throw new UnityException($"Node with position {nodePosition} doesn't exist");
+
+            return node;
         }
 
         private void Init()
