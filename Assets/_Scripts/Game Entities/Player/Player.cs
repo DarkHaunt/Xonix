@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Xonix.Trail;
-using Xonix.Grid;
 using UnityEngine;
+using Xonix.PlayerInput;
+using Xonix.Grid;
 
 
 
@@ -15,37 +15,14 @@ namespace Xonix.Entities.Player
         [SerializeField] private GridNodeSource _trailNodeSource;
         [SerializeField] private GridNodeSource _earthNodeSource;
 
+        [SerializeField] private FourDirectionInputTranslator _inputTranslator;
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
+
+        private Vector2 _moveDirection;
+
         private bool _isTrailing = false;
-
-
-
-        private Direction MoveDirection
-        {
-            get
-            {
-                #region [TEST INPUT SYSTEM]
-
-                if (Input.GetKey(KeyCode.W))
-                    return Direction.Top;
-
-                if (Input.GetKey(KeyCode.S))
-                    return Direction.Down;
-
-                if (Input.GetKey(KeyCode.D))
-                    return Direction.Right;
-
-                if (Input.GetKey(KeyCode.A))
-                    return Direction.Left;
-
-                // TODO: For test
-                return Direction.Top;
-
-                #endregion
-            }
-        }
 
 
 
@@ -53,17 +30,29 @@ namespace Xonix.Entities.Player
         {
             _trailMarker = new TrailMarker(_trailNodeSource);
             _corrupter = new Corrupter(_earthNodeSource);
+
+            // Set direction relevant to holded button
+            _inputTranslator.UpArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.up);
+            _inputTranslator.DownArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.down);
+            _inputTranslator.LeftArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.left);
+            _inputTranslator.RightArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.right);
+
+            // On unhiold stop movement
+            _inputTranslator.UpArrowButton.OnHoldEnd += Stop;
+            _inputTranslator.DownArrowButton.OnHoldEnd += Stop;
+            _inputTranslator.LeftArrowButton.OnHoldEnd += Stop;
+            _inputTranslator.RightArrowButton.OnHoldEnd += Stop;
         }
 
         protected override void Move()
         {
-            var direction = GetDirectionValue(MoveDirection);
-            var movePosition = Position + (direction * CellSize);
-
-            // TEST
-            if (MoveDirection == Direction.Zero)
+            // TEST?
+            if (_moveDirection == Vector2.zero)
                 return;
 
+            var movePosition = Position + (_moveDirection * CellSize);
+
+            // If out of field
             if (!XonixGame.TryToGetNodeWithPosition(movePosition, out GridNode node))
                 return;
 
@@ -88,7 +77,7 @@ namespace Xonix.Entities.Player
         private void OnSeaNodeStep(GridNode seaNode)
         {
             _isTrailing = true;
-            _trailMarker.MarkNodeAsTrail(seaNode, MoveDirection);
+            _trailMarker.MarkNodeAsTrail(seaNode, _moveDirection);
         }
 
         private void OnEarthNodeStep()
@@ -101,6 +90,25 @@ namespace Xonix.Entities.Player
             CorruptZonesAttachedToTrail();
         }
 
+        private void OnTrailNodeStep()
+        {
+            print("Player loses because stepped on his trail");
+
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+
+#if UNITY_ANDROID_API
+                        Application.Quit();
+#endif
+        }
+
+        /// <summary>
+        /// Corrupts all zones, that attached to current trail
+        /// <para>
+        /// Zone shouldn't have any enemy inside to be corrupted
+        /// </para>
+        /// </summary>
         private void CorruptZonesAttachedToTrail()
         {
             // Corrupt all trail nodes for first
@@ -112,40 +120,30 @@ namespace Xonix.Entities.Player
 
             foreach (var nodeKeyDirectionValue in _trailMarker.TrailNodesDirections)
             {
-                var nodeDirection = GetDirectionValue(nodeKeyDirectionValue.Value);
+                var node = nodeKeyDirectionValue.Key;
+                var nodeWalkDirection = nodeKeyDirectionValue.Value;
 
-                var firstNeighborNodePosition = nodeKeyDirectionValue.Key.Position + nodeDirection.RotateFor90DegreeClockwise();
-                var secondNeighborNodePosition = nodeKeyDirectionValue.Key.Position + nodeDirection.RotateFor90DegreeCounterClockwise();
 
-                _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
+                var firstNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeClockwise();
+
+                if (!checkedNodePositions.Contains(firstNeighborNodePosition))
+                    _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);                
+                
+                var secondNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeCounterClockwise();
+
+                if (!checkedNodePositions.Contains(secondNeighborNodePosition))
+                    _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
+
+
                 _corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions);
             }
+
+            // Delete all trail data
+            //_trailMarker.ResetTrail();
         }
 
-        private void OnTrailNodeStep()
-        {
-            print("End game");
+        private void SetMoveDirection(Vector2 newMoveDirection) => _moveDirection = newMoveDirection;
 
-            /*#if UNITY_EDITOR
-                        UnityEditor.EditorApplication.isPlaying = false;
-            #endif
-
-            #if UNITY_STANDALONE
-                        Application.Quit();
-            #endif*/
-        }
-
-
-
-        private class NodePolygon
-        {
-            public readonly IReadOnlyList<GridNode> _vertices;
-
-
-            public NodePolygon(IList<GridNode> vertices)
-            {
-                _vertices = vertices as IReadOnlyList<GridNode>;
-            }
-        }
+        private void Stop() => _moveDirection = Vector2.zero;
     }
 }

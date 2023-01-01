@@ -1,18 +1,15 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
+
 
 
 namespace Xonix.Entities
 {
-    // Using CellSize as move step for properly move on the grid
-    using static StaticData;
-
     [RequireComponent(typeof(SpriteRenderer))]
     public abstract class Entity : MonoBehaviour
     {
-        private const float WalkDelaySeconds = 0.05f;
-        private static readonly WaitForSeconds _walkCooldown = new WaitForSeconds(WalkDelaySeconds);
-
+        private const float MoveTimeDelaySeconds = 0.02f;
+        private static readonly YieldInstruction MoveTimeYield = new WaitForSeconds(MoveTimeDelaySeconds);
 
         [SerializeField] private SpriteRenderer _spriteRenderer;
 
@@ -26,24 +23,27 @@ namespace Xonix.Entities
 
         protected abstract void Move();
 
+        /// <summary>
+        /// Controlls properly move speed of the entity
+        /// </summary>
+        /// <returns></returns>
         private IEnumerator MoveCoroutine()
         {
             while (true)
             {
                 Move();
 
-                yield return _walkCooldown; 
+                yield return MoveTimeYield;
             }
         }
 
 
 
-        private void Start()
+        private void Awake()
         {
             Init();
 
             StartCoroutine(MoveCoroutine());
         }
-
     }
 }

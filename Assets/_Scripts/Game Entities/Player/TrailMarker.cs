@@ -1,19 +1,27 @@
 using System.Collections.Generic;
+using UnityEngine;
 using Xonix.Grid;
 
 
 
-namespace Xonix.Trail
+namespace Xonix.Entities.Player
 {
-    using static StaticData;
-
     /// <summary>
-    /// Marks tiles as trail one
+    /// Marks tiles as trail ones
     /// </summary>
     public class TrailMarker
     {
-        private readonly Dictionary<GridNode, Direction> _nodesDirections = new Dictionary<GridNode, Direction>();
+        private readonly Dictionary<GridNode, Vector2> _nodesDirections = new Dictionary<GridNode, Vector2>();
         private readonly GridNodeSource _trailNodeSource;
+
+
+        /// <summary>
+        /// Key - Nodes
+        /// <para>
+        /// Values - Directions from where this node were entered
+        /// </para>
+        /// </summary>
+        public IReadOnlyDictionary<GridNode, Vector2> TrailNodesDirections => _nodesDirections;
 
 
 
@@ -23,19 +31,13 @@ namespace Xonix.Trail
         }
 
 
-        public IReadOnlyDictionary<GridNode, Direction> TrailNodesDirections => _nodesDirections;
 
-
-
-        public void MarkNodeAsTrail(GridNode gridNode, Direction nodeDireactio)
+        public void MarkNodeAsTrail(GridNode gridNode, Vector2 nodeWalkDireaction)
         {
-            _nodesDirections.Add(gridNode, nodeDireactio);
+            _nodesDirections.Add(gridNode, nodeWalkDireaction);
             gridNode.SetSource(_trailNodeSource);
         }
 
-        public void ResetTrail()
-        {
-            _nodesDirections.Clear();
-        }
+        public void ResetTrail() => _nodesDirections.Clear();
     } 
 }

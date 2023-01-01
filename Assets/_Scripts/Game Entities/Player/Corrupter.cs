@@ -10,11 +10,13 @@ namespace Xonix.Entities.Player
     using static GridNodeSource;
     using static StaticData;
 
-
+    /// <summary>
+    /// Marks zone without enemy by the 
+    /// </summary>
     public class Corrupter
     {
         private readonly GridNodeSource _corruptedNodeSource;
-        private readonly Vector2[] _neighboursTemplates = new Vector2[4]
+        private readonly Vector2[] _neighboursTemplates = new Vector2[4] // Convenient node neighbours position
         {
             new Vector2(0f, CellSize),
             new Vector2(0f, -CellSize),
@@ -31,6 +33,11 @@ namespace Xonix.Entities.Player
 
 
 
+        /// <summary>
+        /// Mark closed with corrupted or grid border zone with corruption source
+        /// </summary>
+        /// <param name="seedNodePosition">Corruption start node</param>
+        /// <param name="checkedPositions">Set of already checked postions for optimization</param>
         public void CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
         {
             var uncheckedNodes = new Stack<GridNode>();
@@ -39,7 +46,6 @@ namespace Xonix.Entities.Player
             uncheckedNodes.Push(seedNode);
 
             Action onZoneFreeOfEnemies = null;
-
 
             while (uncheckedNodes.Count != 0)
             {
@@ -59,19 +65,20 @@ namespace Xonix.Entities.Player
             }
 
             if (IsEnemyInZone(checkedPositions))
-            {
-                MonoBehaviour.print($"Zone with start node pos {seedNodePosition} DON'T have an enemy");
                 onZoneFreeOfEnemies?.Invoke();
-            }
-            else
-                MonoBehaviour.print("Zone HAVE an enemy");
         }
 
+        /// <summary>
+        /// Immidietry corruptes all nodes in collection
+        /// </summary>
+        /// <param name="nodes"></param>
         public void CorruptNodes(IEnumerable<GridNode> nodes)
         {
             foreach (var node in nodes)
                 CorruptNode(node);
         }
+
+        private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
 
         private bool IsEnemyInZone(ISet<Vector2> zoneNodesPositions)
         {
@@ -83,7 +90,15 @@ namespace Xonix.Entities.Player
             return zoneNodesPositions.Count == nodesCount; // If not the same count of positions - enemies stay in the zone
         }
 
-        private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
+        /// <summary>
+        /// Gets all positions of enemies, that hypothetically can be in the zone
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<Vector2> GetEnemiesPositions()
+        {
+            foreach (var enemy in XonixGame.SeaEnemies)
+                yield return enemy.Position;
+        }
 
         private GridNode GetNode(Vector2 vector2)
         {
@@ -91,12 +106,6 @@ namespace Xonix.Entities.Player
                 throw new UnityException($"Node with position {vector2} doesn't exist");
 
             return node;
-        }
-
-        private IEnumerable<Vector2> GetEnemiesPositions()
-        {
-            foreach (var enemy in XonixGame.SeaEnemies)
-                yield return enemy.Position;
         }
     }
 }

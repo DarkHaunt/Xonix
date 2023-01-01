@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System;
-using Xonix.Grid;
 using Xonix.Entities.Enemies;
 using UnityEngine;
 
@@ -9,48 +6,27 @@ using UnityEngine;
 namespace Xonix.Entities
 {
     using static StaticData;
-    using static GridNodeSource;
+    using static EnemyBehaviour;
 
     public class Enemy : Entity
     {
-        private const int DirectionsCount = 4;
-        private static readonly System.Random _randomizer = new System.Random();
-
-
         [SerializeField] private EnemyBehaviour _enemyBehaviour;
-        //private EnemyWalkDirection _currentDirection;
-
         private Vector2 _currentDirection;
-
-
 
 
         public override void Init()
         {
-            // _currentDirection = (EnemyWalkDirection)_randomizer.Next(1, DirectionsCount);
+            _enemyBehaviour = new EnemyBehaviour(EnemyType.SeaEnemy);
 
-            _currentDirection = new Vector2(-1f, -1f);
+            // Because GetRandomSign returns or 1 or -1 it is perfectly sets random dioganal direction
+            _currentDirection = new Vector2(GetRandomSign(), GetRandomSign());
         }
 
         protected override void Move()
         {
-            var nextNodePosition = Position + _currentDirection * CellSize;
+            _currentDirection = _enemyBehaviour.GetMoveTranslation(Position, _currentDirection);
 
-            if (!XonixGame.TryToGetNodeWithPosition(nextNodePosition, out GridNode nextNode) || _enemyBehaviour.IsNodeHasBorderState(nextNode))
-                _enemyBehaviour.TryToBounceFromNode(nextNodePosition, _currentDirection, out _currentDirection);
-
-            transform.position += (Vector3)_currentDirection * CellSize;
-            //transform.Translate(newDirection * CellSize);
-        }
-
-
-
-        public enum EnemyWalkDirection
-        {
-            TopLeft = 1,
-            TopRight = 2,
-            BottomLeft = 3,
-            BottomRight = 4
+            transform.Translate(_currentDirection * CellSize);
         }
     }
 }

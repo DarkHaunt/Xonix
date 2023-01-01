@@ -3,43 +3,94 @@ using Xonix.Grid;
 using UnityEngine;
 
 
+
 namespace Xonix.Entities.Enemies
 {
     using static GridNodeSource;
+    using static StaticData;
 
-    public abstract class EnemyBehaviour : ScriptableObject
+    public class EnemyBehaviour
     {
-        private static readonly Dictionary<Type, NodeState> BorderNodeStates = new Dictionary<Type, NodeState>()
+        private static readonly Dictionary<EnemyType, NodeState> BorderNodeType = new Dictionary<EnemyType, NodeState>()
         {
-            [Type.Earth] = NodeState.Sea,
-            [Type.Sea] = NodeState.Earth,
+            [EnemyType.EarthEnemy] = NodeState.Sea,
+            [EnemyType.SeaEnemy] = NodeState.Earth,
         };
 
-        private Type _enemyType;
+        private readonly EnemyType _enemyType;
 
 
 
-        public abstract void TryToBounceFromNode(Vector2 nodePosition, Vector2 moveDirection, out Vector2 bounceDirection);
-
-        protected abstract Vector2 GetNewMoveDirection(Vector2 walkNodePosition, Vector2 currentDirection);
-
-        public bool IsNodeHasBorderState(GridNode node) => BorderNodeStates[_enemyType] == node.State;
-
-        protected void SetEnemyType(Type enemyType) => _enemyType = enemyType;
-
-
-
-
-        protected virtual void Awake()
+        public EnemyBehaviour(EnemyType enemyType)
         {
-            
+            _enemyType = enemyType;
         }
 
 
-        public enum Type
+
+        public Vector2 GetMoveTranslation(Vector2 currentPosition, Vector2 currentMoveDirection)
         {
-            Sea,
-            Earth
+            var bounceNodePosition = currentPosition + (currentMoveDirection * CellSize);
+
+            if (!XonixGame.TryToGetNodeWithPosition(bounceNodePosition, out GridNode nextNode) || IsNodeHasBorderState(nextNode))
+                currentMoveDirection = GetBounceDirection(currentPosition, currentMoveDirection);
+            else
+            {
+                if (IsNodeTrailState(nextNode))
+                {
+                    MonoBehaviour.print("Sosi v taksi");
+                    XonixGame.EndGame();
+                }
+            }
+
+
+            return currentMoveDirection * CellSize;
         }
-    } 
+
+        private Vector2 GetBounceDirection(Vector2 currentNodePosition, Vector2 currentDirection)
+        {
+            var firstNeighbourPosition = currentNodePosition + new Vector2(currentDirection.x, 0f);
+            var secondNeighbourPosition = currentNodePosition + new Vector2(0f, currentDirection.y);
+
+            var firstNeighbourNodeIsBorder = IsPositionBounceBorder(firstNeighbourPosition);
+            var secondNeighbourNodeIsBorder = IsPositionBounceBorder(secondNeighbourPosition);
+
+            // If moving IN angle - bounce in opposite direction
+            if (firstNeighbourNodeIsBorder && secondNeighbourNodeIsBorder)
+                return currentDirection * new Vector2(-1f, -1f);
+
+            // IF moving ON angle - bounce in opposite direction
+            if (!firstNeighbourNodeIsBorder && !secondNeighbourNodeIsBorder)
+                return currentDirection * new Vector2(-1f, -1f);
+
+            // If second node is free - rotate on 90 degree acconrding the second node
+            if (firstNeighbourNodeIsBorder)
+                return new Vector2(-currentDirection.x, currentDirection.y);
+
+            // If first node is free - rotate on 90 degree acconrding the first node
+            return new Vector2(currentDirection.x, -currentDirection.y);
+        }
+
+        private bool IsPositionBounceBorder(Vector2 position)
+        {
+            var isNodeOutOfGameField = !XonixGame.TryToGetNodeWithPosition(position, out GridNode node);
+
+            if (!isNodeOutOfGameField)
+                return IsNodeHasBorderState(node);
+
+            return isNodeOutOfGameField;
+        }
+
+        private bool IsNodeHasBorderState(GridNode node) => BorderNodeType[_enemyType] == node.State;
+
+        private bool IsNodeTrailState(GridNode node) => node.State == NodeState.Trail;
+
+
+
+        public enum EnemyType
+        {
+            SeaEnemy,
+            EarthEnemy
+        }
+    }
 }
