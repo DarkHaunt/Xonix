@@ -14,12 +14,17 @@ namespace Xonix.Entities
         private Vector2 _currentDirection;
 
 
-        public override void Init()
-        {
-            _enemyBehaviour = new EnemyBehaviour(EnemyType.SeaEnemy);
 
-            // Because GetRandomSign returns or 1 or -1 it is perfectly sets random dioganal direction
+        public override void Init(Vector2 initPosition, Sprite sprite)
+        {
             _currentDirection = new Vector2(GetRandomSign(), GetRandomSign());
+
+            base.Init(initPosition, sprite);
+        }
+
+        public void SetBehavior(EnemyType enemyType)
+        {
+            _enemyBehaviour = new EnemyBehaviour(enemyType);
         }
 
         protected override void Move()
@@ -27,6 +32,12 @@ namespace Xonix.Entities
             _currentDirection = _enemyBehaviour.GetMoveTranslation(Position, _currentDirection);
 
             transform.Translate(_currentDirection * CellSize);
+
+            if (Position == XonixGame.PlayerPosition)
+            {
+                print("Enemy touched player");
+                XonixGame.PlayerLose();
+            }
         }
     }
 }

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 328a311d03777ed42949e33528e05d52
+  m_SerializeEntries:
+  - m_GUID: 099f61c50253d904fbf4aa08349a81a3
+    m_Address: Grid/NodeSource/EarthNodeSource
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: fd62fe3a88a7a984a84ce397931c9190
+    m_Address: Grid/NodeSource/TrailNodeSource
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: c38081ef7bca42041b3d1f3ea4052918, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 6f779fbc7c1baf0499f01ebb57098f37, type: 2}
+    - {fileID: 11400000, guid: 92f1e2e9c6e039d408d4a079f0681434, type: 2}

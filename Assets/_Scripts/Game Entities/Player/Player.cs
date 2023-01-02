@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine.AddressableAssets;
 using UnityEngine;
 using Xonix.PlayerInput;
 using Xonix.Grid;
@@ -12,10 +14,8 @@ namespace Xonix.Entities.Player
 
     public class Player : Entity
     {
-        [SerializeField] private GridNodeSource _trailNodeSource;
-        [SerializeField] private GridNodeSource _earthNodeSource;
-
-        [SerializeField] private FourDirectionInputTranslator _inputTranslator;
+        private const string EarthNodeSource = "Grid/NodeSource/EarthNodeSource";
+        private const string TrailNodeSource = "Grid/NodeSource/TrailNodeSource";
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
@@ -26,22 +26,29 @@ namespace Xonix.Entities.Player
 
 
 
-        public override void Init()
+        public async void Init(FourDirectionInputTranslator inputTranslator, Vector2 initPosition, Sprite sprite)
         {
-            _trailMarker = new TrailMarker(_trailNodeSource);
-            _corrupter = new Corrupter(_earthNodeSource);
+            var earthNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(EarthNodeSource).Task;
+            var trailNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(TrailNodeSource).Task;
 
             // Set direction relevant to holded button
-            _inputTranslator.UpArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.up);
-            _inputTranslator.DownArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.down);
-            _inputTranslator.LeftArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.left);
-            _inputTranslator.RightArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.right);
+            inputTranslator.UpArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.up);
+            inputTranslator.DownArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.down);
+            inputTranslator.LeftArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.left);
+            inputTranslator.RightArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.right);
 
             // On unhiold stop movement
-            _inputTranslator.UpArrowButton.OnHoldEnd += Stop;
-            _inputTranslator.DownArrowButton.OnHoldEnd += Stop;
-            _inputTranslator.LeftArrowButton.OnHoldEnd += Stop;
-            _inputTranslator.RightArrowButton.OnHoldEnd += Stop;
+            inputTranslator.UpArrowButton.OnHoldEnd += Stop;
+            inputTranslator.DownArrowButton.OnHoldEnd += Stop;
+            inputTranslator.LeftArrowButton.OnHoldEnd += Stop;
+            inputTranslator.RightArrowButton.OnHoldEnd += Stop;
+
+            Init(initPosition, sprite);
+
+            await Task.WhenAll(earthNodeSourceLoadingTask, trailNodeSourceLoadingTask);
+
+            _trailMarker = new TrailMarker(trailNodeSourceLoadingTask.Result);
+            _corrupter = new Corrupter(earthNodeSourceLoadingTask.Result);
         }
 
         protected override void Move()

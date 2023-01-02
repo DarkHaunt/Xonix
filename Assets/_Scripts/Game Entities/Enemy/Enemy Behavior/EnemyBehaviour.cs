@@ -38,8 +38,8 @@ namespace Xonix.Entities.Enemies
             {
                 if (IsNodeTrailState(nextNode))
                 {
-                    MonoBehaviour.print("Sosi v taksi");
-                    XonixGame.EndGame();
+                    MonoBehaviour.print("Enemy touched trail");
+                    XonixGame.PlayerLose();
                 }
             }
 

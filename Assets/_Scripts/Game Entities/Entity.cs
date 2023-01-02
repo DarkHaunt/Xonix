@@ -13,15 +13,27 @@ namespace Xonix.Entities
 
         [SerializeField] private SpriteRenderer _spriteRenderer;
 
+        private Vector2 _startPosition; // First position after 
 
 
         public Vector2 Position => transform.position;
 
 
 
-        public abstract void Init();
+        public virtual void Init(Vector2 initPosition, Sprite sprite)
+        {
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _spriteRenderer.sprite = sprite;
+
+            transform.position = initPosition;
+            _startPosition = initPosition;
+
+            StartCoroutine(MoveCoroutine());
+        }
 
         protected abstract void Move();
+
+        public void ResetPosition() => transform.position = _startPosition; 
 
         /// <summary>
         /// Controlls properly move speed of the entity
@@ -31,19 +43,10 @@ namespace Xonix.Entities
         {
             while (true)
             {
-                Move();
-
                 yield return MoveTimeYield;
+
+                Move();
             }
-        }
-
-
-
-        private void Awake()
-        {
-            Init();
-
-            StartCoroutine(MoveCoroutine());
         }
     }
 }
