@@ -33,12 +33,14 @@ namespace Xonix.Entities.Player
 
 
 
+
         /// <summary>
         /// Mark closed with corrupted or grid border zone with corruption source
         /// </summary>
         /// <param name="seedNodePosition">Corruption start node</param>
         /// <param name="checkedPositions">Set of already checked postions for optimization</param>
-        public void CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
+        /// <returns>Count of corrupted nodes</returns>
+        public int CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
         {
             var uncheckedNodes = new Stack<GridNode>();
 
@@ -46,6 +48,7 @@ namespace Xonix.Entities.Player
             uncheckedNodes.Push(seedNode);
 
             Action onZoneFreeOfEnemies = null;
+            int corruptedNodeCount = 0;
 
             while (uncheckedNodes.Count != 0)
             {
@@ -58,7 +61,10 @@ namespace Xonix.Entities.Player
                 checkedPositions.Add(currentPickedNode.Position);
 
                 if (currentPickedNode.State == NodeState.Sea)
+                {
                     onZoneFreeOfEnemies += () => CorruptNode(currentPickedNode);
+                    corruptedNodeCount++;
+                }
 
                 foreach (var neighbourTemplate in _neighboursTemplates)
                     uncheckedNodes.Push(GetNode(currentPickedNode.Position + neighbourTemplate));
@@ -66,16 +72,26 @@ namespace Xonix.Entities.Player
 
             if (IsEnemyInZone(checkedPositions))
                 onZoneFreeOfEnemies?.Invoke();
+
+            return corruptedNodeCount;
         }
 
         /// <summary>
         /// Immidietry corruptes all nodes in collection
         /// </summary>
         /// <param name="nodes"></param>
-        public void CorruptNodes(IEnumerable<GridNode> nodes)
+        /// <returns>Count of corrupted nodes</returns>
+        public int CorruptNodes(IEnumerable<GridNode> nodes)
         {
+            int nodesCount = 0;
+
             foreach (var node in nodes)
+            {
                 CorruptNode(node);
+                nodesCount++;
+            }
+
+            return nodesCount;
         }
 
         private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);

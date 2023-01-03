@@ -68,7 +68,7 @@ namespace Xonix.Grid
                         firstNodePosition + EarthInitBorderAligment,
 
                     rightTopCornerPosition:
-                        firstNodePosition + new Vector2(LineUnitSize, ColumnUnitSize) - EarthInitBorderAligment
+                        firstNodePosition + new Vector2(LineUnitSize - 1, ColumnUnitSize - 1) - EarthInitBorderAligment
                 );
 
 
@@ -84,6 +84,7 @@ namespace Xonix.Grid
                 var nodeSource = (isInSeaInitArea) ? _seaNodeSource : _earthNodeSource;
 
                 currentNode.SetSource(nodeSource);
+                currentNode.transform.SetParent(transform);
 
                 _grid.Add(nodePosition, currentNode);
 
@@ -94,8 +95,34 @@ namespace Xonix.Grid
                 }
             }
 
+            // TODO: ”брать это от сюда
             _mainCamera.transform.position = new Vector3(LineUnitSize / 2, ColumnUnitSize / 2, -10f) - new Vector3(CellSize / 2, CellSize / 2);
-            DontDestroyOnLoad(gameObject);
+
+            XonixGame.OnFieldReload += ResetSeaGrid;
+        }
+
+        /// <summary>
+        /// Sets all nodes, that were inited as sea nodes to sea source, if they are not
+        /// </summary>
+        private void ResetSeaGrid()
+        {
+            var currentNodePosition = _seaFieldInitArea.LeftBottomCornerPosition;
+
+            while (_seaFieldInitArea.IsPositionInArea(currentNodePosition))
+            {
+                var currentNode = _grid[currentNodePosition];
+
+                if (currentNode.State != _seaNodeSource.State)
+                    currentNode.SetSource(_seaNodeSource);
+
+                if (currentNodePosition.x == (LineUnitSize - EarthInitBorderThickness - 1))
+                {
+                    currentNodePosition.x = EarthInitBorderThickness - CellSize;
+                    currentNodePosition.y += CellSize;
+                }
+
+                currentNodePosition.x += CellSize;
+            }
         }
 
 
@@ -126,9 +153,9 @@ namespace Xonix.Grid
             public bool IsPositionInArea(Vector2 position)
             {
                 return position.x >= LeftBottomCornerPosition.x &&
-                    position.x < RightTopCornerPosition.x &&
+                    position.x <= RightTopCornerPosition.x &&
                     position.y >= LeftBottomCornerPosition.y &&
-                    position.y < RightTopCornerPosition.y;
+                    position.y <= RightTopCornerPosition.y;
             }
 
         }

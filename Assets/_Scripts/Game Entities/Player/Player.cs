@@ -14,15 +14,18 @@ namespace Xonix.Entities.Player
 
     public class Player : Entity
     {
+        private const int StartLifesCount = 3;
         private const string EarthNodeSource = "Grid/NodeSource/EarthNodeSource";
         private const string TrailNodeSource = "Grid/NodeSource/TrailNodeSource";
+
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
 
         private Vector2 _moveDirection;
 
-        private bool _isTrailing = false;
+        private int _lifesCount = StartLifesCount;
+        [SerializeField] private bool _isTrailing = false;
 
 
 
@@ -38,10 +41,10 @@ namespace Xonix.Entities.Player
             inputTranslator.RightArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.right);
 
             // On unhiold stop movement
-            inputTranslator.UpArrowButton.OnHoldEnd += Stop;
-            inputTranslator.DownArrowButton.OnHoldEnd += Stop;
-            inputTranslator.LeftArrowButton.OnHoldEnd += Stop;
-            inputTranslator.RightArrowButton.OnHoldEnd += Stop;
+            inputTranslator.UpArrowButton.OnHoldEnd += StopMoving;
+            inputTranslator.DownArrowButton.OnHoldEnd += StopMoving;
+            inputTranslator.LeftArrowButton.OnHoldEnd += StopMoving;
+            inputTranslator.RightArrowButton.OnHoldEnd += StopMoving;
 
             Init(initPosition, sprite);
 
@@ -49,11 +52,18 @@ namespace Xonix.Entities.Player
 
             _trailMarker = new TrailMarker(trailNodeSourceLoadingTask.Result);
             _corrupter = new Corrupter(earthNodeSourceLoadingTask.Result);
+
+            XonixGame.OnPlayerLoseLevel += DecreaseLifeCount;
+            XonixGame.OnPlayerLoseLevel += () =>
+            {
+                _isTrailing = false;
+
+                _trailMarker.ResetTrail();
+            };
         }
 
         protected override void Move()
         {
-            // TEST?
             if (_moveDirection == Vector2.zero)
                 return;
 
@@ -73,7 +83,7 @@ namespace Xonix.Entities.Player
                     break;
                 case NodeState.Trail:
                     OnTrailNodeStep();
-                    break;
+                    return; // Shouldn't walk if losed
                 default:
                     break;
             }
@@ -101,13 +111,7 @@ namespace Xonix.Entities.Player
         {
             print("Player loses because stepped on his trail");
 
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
-
-#if UNITY_ANDROID_API
-                        Application.Quit();
-#endif
+            XonixGame.PlayerLoseLevel();
         }
 
         /// <summary>
@@ -119,7 +123,7 @@ namespace Xonix.Entities.Player
         private void CorruptZonesAttachedToTrail()
         {
             // Corrupt all trail nodes for first
-            _corrupter.CorruptNodes(_trailMarker.TrailNodesDirections.Keys);
+            var corruptedNodesCount = _corrupter.CorruptNodes(_trailMarker.TrailNodesDirections.Keys);
 
             // Init a collection for remembering checked nodes
             var checkedNodePositions = new HashSet<Vector2>();
@@ -134,23 +138,65 @@ namespace Xonix.Entities.Player
                 var firstNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeClockwise();
 
                 if (!checkedNodePositions.Contains(firstNeighborNodePosition))
-                    _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);                
-                
+                    corruptedNodesCount += _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
+
                 var secondNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeCounterClockwise();
 
                 if (!checkedNodePositions.Contains(secondNeighborNodePosition))
-                    _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
-
-
-                _corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions);
+                    corruptedNodesCount += _corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions);
             }
 
+            XonixGame.AddScore(corruptedNodesCount);
             // Delete all trail data
-            //_trailMarker.ResetTrail();
+            _trailMarker.ResetTrail();
+        }
+
+        private void DecreaseLifeCount()
+        {
+            _lifesCount--;
+
+            if (_lifesCount == 0)
+                XonixGame.EndGame();
         }
 
         private void SetMoveDirection(Vector2 newMoveDirection) => _moveDirection = newMoveDirection;
 
-        private void Stop() => _moveDirection = Vector2.zero;
+        private void StopMoving() => _moveDirection = Vector2.zero;
+
+
+        #region [TEST INPUT SYSTEM]
+
+        private void Update()
+        {
+            if (Input.GetKey(KeyCode.W))
+            {
+                _moveDirection = Vector2.up;
+                return;
+            }
+
+            if (Input.GetKey(KeyCode.S))
+            {
+                _moveDirection = Vector2.down;
+                return;
+            }
+
+            if (Input.GetKey(KeyCode.A))
+            {
+                _moveDirection = Vector2.left;
+                return;
+            }
+
+            if (Input.GetKey(KeyCode.D))
+            {
+                _moveDirection = Vector2.right;
+                return;
+            }
+
+
+            _moveDirection = Vector2.zero;
+            
+        } 
+
+        #endregion
     }
 }

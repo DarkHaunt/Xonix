@@ -39,7 +39,7 @@ namespace Xonix.Entities.Enemies
                 if (IsNodeTrailState(nextNode))
                 {
                     MonoBehaviour.print("Enemy touched trail");
-                    XonixGame.PlayerLose();
+                    XonixGame.PlayerLoseLevel();
                 }
             }
 

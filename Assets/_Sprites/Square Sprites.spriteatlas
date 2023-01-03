@@ -47,26 +47,26 @@ SpriteAtlas:
     - {fileID: 21300000, guid: ef7ce44a49fe8c240990a16dd78b20a8, type: 3}
     - {fileID: 21300000, guid: 13467c91bd21c354697a1daa3ef81170, type: 3}
     - {fileID: 21300000, guid: f152bb0a931d29b41b03c9815e13c4d8, type: 3}
-    - {fileID: 21300000, guid: 49169d2f9fcd1fc4b8fb310f5050b2dd, type: 3}
-    - {fileID: 21300000, guid: dba5f249e548f3844a9a24c5a080dc65, type: 3}
+    - {fileID: 2800000, guid: bf5350463fb67754caa595a65a3524e8, type: 3}
+    - {fileID: 21300000, guid: 8df0616f03a9c8d4488bc5f27e73d6f5, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: 13467c91bd21c354697a1daa3ef81170, type: 3}
-  - {fileID: 21300000, guid: dba5f249e548f3844a9a24c5a080dc65, type: 3}
+  - {fileID: 21300000, guid: bf5350463fb67754caa595a65a3524e8, type: 3}
   - {fileID: 21300000, guid: f152bb0a931d29b41b03c9815e13c4d8, type: 3}
   - {fileID: 21300000, guid: ef7ce44a49fe8c240990a16dd78b20a8, type: 3}
   - {fileID: 21300000, guid: 0346808cd472696438a6ec1184cf4e5d, type: 3}
-  - {fileID: 21300000, guid: 49169d2f9fcd1fc4b8fb310f5050b2dd, type: 3}
+  - {fileID: 21300000, guid: 8df0616f03a9c8d4488bc5f27e73d6f5, type: 3}
   m_PackedSpriteNamesToIndex:
   - SeaNodeSprite
   - EarthEnemySprite
   - PlayerSprite
   - TrailNode
   - EarthNodeSprite
-  - SeaEnemySprite
+  - SeaEnemeySprite
   m_RenderDataMap: {}
   m_Tag: Square Sprites
   m_IsVariant: 0

@@ -36,7 +36,7 @@ namespace Xonix.Entities
             if (Position == XonixGame.PlayerPosition)
             {
                 print("Enemy touched player");
-                XonixGame.PlayerLose();
+                XonixGame.PlayerLoseLevel();
             }
         }
     }

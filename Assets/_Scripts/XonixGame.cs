@@ -16,10 +16,12 @@ namespace Xonix
     public class XonixGame : MonoBehaviour
     {
         private static XonixGame _instance;
-        private const int InitCountOfSeaEnemies = 3;
 
+        private const int StartCountOfSeaEnemies = 3;
 
-        public event Action OnFieldReload;
+        public static event Action OnFieldReload;
+        public static event Action OnPlayerLoseLevel;
+
 
         [SerializeField] private XonixGrid _grid;
         [SerializeField] private FourDirectionInputTranslator _inputSystem;
@@ -28,6 +30,7 @@ namespace Xonix
         [SerializeField] private Sprite _earthEnemySprite;
         [SerializeField] private Sprite _playerSprite;
 
+        // TODO: Create enemy spawner
         private EnemyFactory _enemeyFactory;
 
         private List<Enemy> _seaEnemies;
@@ -39,25 +42,11 @@ namespace Xonix
 
 
         public static IList<Enemy> SeaEnemies => _instance._seaEnemies;
-
         public static Vector2 PlayerPosition => _instance._player.Position;
 
 
 
-        /// <summary>
-        /// Tries to get grid node with parameter position
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public static bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
-        {
-            return _instance._grid.TryToGetNode(position, out node);
-        }
-        // TODO: Должен быть не конец игры, а проигрыш игрока на текущем уровне
-        public static void PlayerLose() => _instance.OnFieldReload?.Invoke();
-
-        private void GameOver()
+        public static void EndGame()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
@@ -68,19 +57,15 @@ namespace Xonix
 #endif
         }
 
-        private void Init()
+        public static void PlayerLoseLevel()
         {
-            _instance.OnFieldReload += GameOver;
-
-            _enemeyFactory = new EnemyFactory();
-
-            SpawnPlayer();
-            SpawnEnemies();
+            OnFieldReload?.Invoke();
+            OnPlayerLoseLevel?.Invoke();
         }
 
         private void SpawnEnemies()
         {
-            var enemiesCount = InitCountOfSeaEnemies + _levelNumber;
+            var enemiesCount = StartCountOfSeaEnemies + _levelNumber;
 
             _seaEnemies = new List<Enemy>(enemiesCount);
 
@@ -108,6 +93,21 @@ namespace Xonix
             _player.Init(_inputSystem, playerPosition, _playerSprite);
 
             OnFieldReload += _player.ResetPosition;
+        }
+
+        public static void AddScore(int scroreValue) => _instance._score += scroreValue;
+
+        private void Init()
+        {
+            _enemeyFactory = new EnemyFactory();
+
+            SpawnPlayer();
+            SpawnEnemies();
+        }
+
+        public static bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
+        {
+            return _instance._grid.TryToGetNode(position, out node);
         }
 
 
