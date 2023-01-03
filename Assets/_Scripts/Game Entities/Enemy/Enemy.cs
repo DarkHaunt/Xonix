@@ -15,18 +15,6 @@ namespace Xonix.Entities
 
 
 
-        public override void Init(Vector2 initPosition, Sprite sprite)
-        {
-            _currentDirection = new Vector2(GetRandomSign(), GetRandomSign());
-
-            base.Init(initPosition, sprite);
-        }
-
-        public void SetBehavior(EnemyType enemyType)
-        {
-            _enemyBehaviour = new EnemyBehaviour(enemyType);
-        }
-
         protected override void Move()
         {
             _currentDirection = _enemyBehaviour.GetMoveTranslation(Position, _currentDirection);
@@ -38,6 +26,18 @@ namespace Xonix.Entities
                 print("Enemy touched player");
                 XonixGame.PlayerLoseLevel();
             }
+        }
+
+        public override void Init(Vector2 initPosition, Sprite sprite)
+        {
+            _currentDirection = new Vector2(GetRandomSign(), GetRandomSign());
+
+            base.Init(initPosition, sprite);
+        }
+
+        public void SetBehavior(EnemyType enemyType)
+        {
+            _enemyBehaviour = new EnemyBehaviour(enemyType);
         }
     }
 }

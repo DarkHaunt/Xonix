@@ -84,7 +84,7 @@ namespace Xonix.Entities.Enemies
         private bool IsNodeHasBorderState(GridNode node) => BorderNodeType[_enemyType] == node.State;
 
         private bool IsNodeTrailState(GridNode node) => node.State == NodeState.Trail;
-
+  
 
 
         public enum EnemyType

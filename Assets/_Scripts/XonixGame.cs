@@ -73,7 +73,7 @@ namespace Xonix
             {
                 var enemyPosition = _grid.GetRandomSeaFieldNodePosition();
                 var enemy = _enemeyFactory.SpawnEnemy(EnemyType.SeaEnemy, enemyPosition, _seaEnemySprite);
-                OnFieldReload += enemy.ResetPosition;
+                OnFieldReload += () => enemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
 
                 _seaEnemies.Add(enemy);
             }
@@ -82,7 +82,7 @@ namespace Xonix
             var earthEnemyPosition = _grid.GetFieldBottomCenterPosition();
             var earthEnemy = _enemeyFactory.SpawnEnemy(EnemyType.EarthEnemy, earthEnemyPosition, _earthEnemySprite);
 
-            OnFieldReload += earthEnemy.ResetPosition;
+            OnFieldReload += () => earthEnemy.transform.position = _grid.GetFieldBottomCenterPosition();
         }
 
         private void SpawnPlayer()
@@ -92,7 +92,8 @@ namespace Xonix
             _player = new GameObject($"Player").AddComponent<Player>();
             _player.Init(_inputSystem, playerPosition, _playerSprite);
 
-            OnFieldReload += _player.ResetPosition;
+            OnFieldReload += () => _player.transform.position = _grid.GetFieldTopCenterPosition();
+            _player.OnNodeZoneCorrupted += _grid.RemoveSeaNodes;
         }
 
         public static void AddScore(int scroreValue) => _instance._score += scroreValue;
@@ -109,6 +110,7 @@ namespace Xonix
         {
             return _instance._grid.TryToGetNode(position, out node);
         }
+
 
 
 

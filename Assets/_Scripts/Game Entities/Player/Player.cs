@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 using UnityEngine.AddressableAssets;
 using UnityEngine;
 using Xonix.PlayerInput;
@@ -14,8 +15,12 @@ namespace Xonix.Entities.Player
 
     public class Player : Entity
     {
+        public event Action<IEnumerable<GridNode>> OnNodeZoneCorrupted;
+
         private const int StartLifesCount = 3;
+
         private const string EarthNodeSource = "Grid/NodeSource/EarthNodeSource";
+        private const string SeaNodeSource = "Grid/NodeSource/SeaNodeSource";
         private const string TrailNodeSource = "Grid/NodeSource/TrailNodeSource";
 
 
@@ -33,6 +38,7 @@ namespace Xonix.Entities.Player
         {
             var earthNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(EarthNodeSource).Task;
             var trailNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(TrailNodeSource).Task;
+            var seaNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(SeaNodeSource).Task;
 
             // Set direction relevant to holded button
             inputTranslator.UpArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.up);
@@ -40,7 +46,7 @@ namespace Xonix.Entities.Player
             inputTranslator.LeftArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.left);
             inputTranslator.RightArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.right);
 
-            // On unhiold stop movement
+            // On unhold stop movement
             inputTranslator.UpArrowButton.OnHoldEnd += StopMoving;
             inputTranslator.DownArrowButton.OnHoldEnd += StopMoving;
             inputTranslator.LeftArrowButton.OnHoldEnd += StopMoving;
@@ -48,17 +54,19 @@ namespace Xonix.Entities.Player
 
             Init(initPosition, sprite);
 
-            await Task.WhenAll(earthNodeSourceLoadingTask, trailNodeSourceLoadingTask);
+            await Task.WhenAll(earthNodeSourceLoadingTask, trailNodeSourceLoadingTask, seaNodeSourceLoadingTask);
 
             _trailMarker = new TrailMarker(trailNodeSourceLoadingTask.Result);
-            _corrupter = new Corrupter(earthNodeSourceLoadingTask.Result);
+            _corrupter = new Corrupter(earthNodeSourceLoadingTask.Result, seaNodeSourceLoadingTask.Result);
 
             XonixGame.OnPlayerLoseLevel += DecreaseLifeCount;
             XonixGame.OnPlayerLoseLevel += () =>
             {
                 _isTrailing = false;
 
-                _trailMarker.ResetTrail();
+                // Set trail marked nodes as non-disturbed
+                _corrupter.ReleaseNodes(_trailMarker.TrailNodesDirections.Keys);
+                _trailMarker.ClearTrail();
             };
         }
 
@@ -124,10 +132,10 @@ namespace Xonix.Entities.Player
         {
             // Corrupt all trail nodes for first
             var corruptedNodesCount = _corrupter.CorruptNodes(_trailMarker.TrailNodesDirections.Keys);
+            var corruptedNodes = new HashSet<GridNode>(_trailMarker.TrailNodesDirections.Keys);
 
             // Init a collection for remembering checked nodes
             var checkedNodePositions = new HashSet<Vector2>();
-
 
             foreach (var nodeKeyDirectionValue in _trailMarker.TrailNodesDirections)
             {
@@ -138,17 +146,19 @@ namespace Xonix.Entities.Player
                 var firstNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeClockwise();
 
                 if (!checkedNodePositions.Contains(firstNeighborNodePosition))
-                    corruptedNodesCount += _corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions);
+                    corruptedNodes.UnionWith(_corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions));
 
                 var secondNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeCounterClockwise();
 
                 if (!checkedNodePositions.Contains(secondNeighborNodePosition))
-                    corruptedNodesCount += _corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions);
+                    corruptedNodes.UnionWith(_corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions));
             }
 
             XonixGame.AddScore(corruptedNodesCount);
+
+            OnNodeZoneCorrupted?.Invoke(corruptedNodes);
             // Delete all trail data
-            _trailMarker.ResetTrail();
+            _trailMarker.ClearTrail();
         }
 
         private void DecreaseLifeCount()
@@ -162,6 +172,7 @@ namespace Xonix.Entities.Player
         private void SetMoveDirection(Vector2 newMoveDirection) => _moveDirection = newMoveDirection;
 
         private void StopMoving() => _moveDirection = Vector2.zero;
+
 
 
         #region [TEST INPUT SYSTEM]
@@ -194,8 +205,8 @@ namespace Xonix.Entities.Player
 
 
             _moveDirection = Vector2.zero;
-            
-        } 
+
+        }
 
         #endregion
     }

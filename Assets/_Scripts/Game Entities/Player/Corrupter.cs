@@ -7,7 +7,6 @@ using System;
 
 namespace Xonix.Entities.Player
 {
-    using static GridNodeSource;
     using static StaticData;
 
     /// <summary>
@@ -16,6 +15,8 @@ namespace Xonix.Entities.Player
     public class Corrupter
     {
         private readonly GridNodeSource _corruptedNodeSource;
+        private readonly GridNodeSource _nonCorruptedNodeSource;
+
         private readonly Vector2[] _neighboursTemplates = new Vector2[4] // Convenient node neighbours position
         {
             new Vector2(0f, CellSize),
@@ -26,11 +27,11 @@ namespace Xonix.Entities.Player
 
 
 
-        public Corrupter(GridNodeSource corruptedNodeSource)
+        public Corrupter(GridNodeSource corruptedNodeSource, GridNodeSource nonCorruptedNodeSource)
         {
             _corruptedNodeSource = corruptedNodeSource;
+            _nonCorruptedNodeSource = nonCorruptedNodeSource;
         }
-
 
 
 
@@ -40,9 +41,10 @@ namespace Xonix.Entities.Player
         /// <param name="seedNodePosition">Corruption start node</param>
         /// <param name="checkedPositions">Set of already checked postions for optimization</param>
         /// <returns>Count of corrupted nodes</returns>
-        public int CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
+        public IEnumerable<GridNode> CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
         {
             var uncheckedNodes = new Stack<GridNode>();
+            var corruptedNodes = new HashSet<GridNode>();
 
             var seedNode = GetNode(seedNodePosition);
             uncheckedNodes.Push(seedNode);
@@ -55,14 +57,15 @@ namespace Xonix.Entities.Player
                 var currentPickedNode = uncheckedNodes.Pop();
 
                 if (checkedPositions.Contains(currentPickedNode.Position) ||
-                    currentPickedNode.State == NodeState.Earth)
+                    currentPickedNode.State == _corruptedNodeSource.State)
                     continue;
 
                 checkedPositions.Add(currentPickedNode.Position);
 
-                if (currentPickedNode.State == NodeState.Sea)
+                if (currentPickedNode.State == _nonCorruptedNodeSource.State)
                 {
                     onZoneFreeOfEnemies += () => CorruptNode(currentPickedNode);
+                    corruptedNodes.Add(currentPickedNode);
                     corruptedNodeCount++;
                 }
 
@@ -70,10 +73,13 @@ namespace Xonix.Entities.Player
                     uncheckedNodes.Push(GetNode(currentPickedNode.Position + neighbourTemplate));
             }
 
-            if (IsEnemyInZone(checkedPositions))
+            if (IsZoneFreeOfEnemies(checkedPositions))
+            {
                 onZoneFreeOfEnemies?.Invoke();
+                return corruptedNodes;
+            }
 
-            return corruptedNodeCount;
+            return new HashSet<GridNode>();
         }
 
         /// <summary>
@@ -96,7 +102,17 @@ namespace Xonix.Entities.Player
 
         private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
 
-        private bool IsEnemyInZone(ISet<Vector2> zoneNodesPositions)
+        /// <summary>
+        /// Decorrupts all nodes in collection
+        /// </summary>
+        /// <param name="nodes"></param>
+        public void ReleaseNodes(IEnumerable<GridNode> nodes)
+        {
+            foreach (var node in nodes)
+                node.SetSource(_nonCorruptedNodeSource);
+        }
+
+        private bool IsZoneFreeOfEnemies(ISet<Vector2> zoneNodesPositions)
         {
             var nodesCount = zoneNodesPositions.Count;
             var enemiesPositions = GetEnemiesPositions();

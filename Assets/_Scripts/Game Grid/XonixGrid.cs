@@ -21,6 +21,8 @@ namespace Xonix.Grid
         private const float EarthInitBorderThickness = 4 * CellSize;
         private static readonly Vector2 EarthInitBorderAligment = new Vector2(EarthInitBorderThickness, EarthInitBorderThickness);
 
+        private static readonly Vector2 FirstNodePosition = Vector2.zero;
+
         #endregion
 
         [SerializeField] private GridNodeSource _seaNodeSource;
@@ -28,7 +30,8 @@ namespace Xonix.Grid
         [SerializeField] private Camera _mainCamera;
 
         private readonly Dictionary<Vector2, GridNode> _grid = new Dictionary<Vector2, GridNode>(FieldSize);
-
+        private readonly HashSet<GridNode> _seaNodes = new HashSet<GridNode>();
+        
 
         private GridNodeFactory _gridNodeFactory;
         private SquareArea _seaFieldInitArea;
@@ -42,33 +45,33 @@ namespace Xonix.Grid
 
         public Vector2 GetRandomSeaFieldNodePosition()
         {
-            var rawRandomX = Random.Range(_seaFieldInitArea.LeftBottomCornerPosition.x, _seaFieldInitArea.RightTopCornerPosition.x);
-            var rawRandomY = Random.Range(_seaFieldInitArea.LeftBottomCornerPosition.y, _seaFieldInitArea.RightTopCornerPosition.y);
+            var nodes = new GridNode[_seaNodes.Count];
+            _seaNodes.CopyTo(nodes);
 
-            var randomX = Mathf.Round(rawRandomX);
-            var randomY = Mathf.Round(rawRandomY);
-
-            return new Vector2(randomX, randomY);
+            return nodes[Randomizer.Next(nodes.Length)].Position;
         }
 
-        public Vector2 GetFieldTopCenterPosition() => Vector2.zero + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
+        public Vector2 GetFieldTopCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
 
-        public Vector2 GetFieldBottomCenterPosition() => Vector2.zero + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
+        public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
+
+        public void RemoveSeaNodes(IEnumerable<GridNode> nodes)
+        {
+            _seaNodes.ExceptWith(nodes);
+        }
 
         private void Init()
         {
             _gridNodeFactory = new GridNodeFactory();
 
-            var firstNodePosition = Vector2.zero;
-
             // Area of grid, which will be filled by sea tiles
             _seaFieldInitArea = new SquareArea
                 (
                     leftBottomCornerPosition:
-                        firstNodePosition + EarthInitBorderAligment,
+                        FirstNodePosition + EarthInitBorderAligment,
 
                     rightTopCornerPosition:
-                        firstNodePosition + new Vector2(LineUnitSize - 1, ColumnUnitSize - 1) - EarthInitBorderAligment
+                        FirstNodePosition + new Vector2(LineUnitSize - 1, ColumnUnitSize - 1) - EarthInitBorderAligment
                 );
 
 
@@ -81,12 +84,16 @@ namespace Xonix.Grid
                 var currentNode = _gridNodeFactory.CreateGridNode(nodePosition);
 
                 var isInSeaInitArea = _seaFieldInitArea.IsPositionInArea(nodePosition);
-                var nodeSource = (isInSeaInitArea) ? _seaNodeSource : _earthNodeSource;
 
+                var nodeSource = (isInSeaInitArea) ? _seaNodeSource : _earthNodeSource;
                 currentNode.SetSource(nodeSource);
-                currentNode.transform.SetParent(transform);
+
+                if (isInSeaInitArea)
+                    _seaNodes.Add(currentNode);
 
                 _grid.Add(nodePosition, currentNode);
+
+                currentNode.transform.SetParent(transform);
 
                 if (x == LineUnitSize - 1)
                 {
@@ -94,35 +101,9 @@ namespace Xonix.Grid
                     y += CellSize;
                 }
             }
-
+            
             // TODO: ”брать это от сюда
             _mainCamera.transform.position = new Vector3(LineUnitSize / 2, ColumnUnitSize / 2, -10f) - new Vector3(CellSize / 2, CellSize / 2);
-
-            XonixGame.OnFieldReload += ResetSeaGrid;
-        }
-
-        /// <summary>
-        /// Sets all nodes, that were inited as sea nodes to sea source, if they are not
-        /// </summary>
-        private void ResetSeaGrid()
-        {
-            var currentNodePosition = _seaFieldInitArea.LeftBottomCornerPosition;
-
-            while (_seaFieldInitArea.IsPositionInArea(currentNodePosition))
-            {
-                var currentNode = _grid[currentNodePosition];
-
-                if (currentNode.State != _seaNodeSource.State)
-                    currentNode.SetSource(_seaNodeSource);
-
-                if (currentNodePosition.x == (LineUnitSize - EarthInitBorderThickness - 1))
-                {
-                    currentNodePosition.x = EarthInitBorderThickness - CellSize;
-                    currentNodePosition.y += CellSize;
-                }
-
-                currentNodePosition.x += CellSize;
-            }
         }
 
 

@@ -12,7 +12,6 @@ namespace Xonix.Entities
         private static readonly YieldInstruction MoveTimeYield = new WaitForSeconds(MoveTimeDelaySeconds);
 
         [SerializeField] private SpriteRenderer _spriteRenderer;
-        private Vector2 _startPosition; // First position after initialization
 
 
 
@@ -26,17 +25,11 @@ namespace Xonix.Entities
             _spriteRenderer.sprite = sprite;
 
             transform.position = initPosition;
-            _startPosition = initPosition;
 
             StartCoroutine(MoveCoroutine());
         }
 
         protected abstract void Move();
-
-        public void ResetPosition()
-        {
-            transform.position = _startPosition;
-        }
 
         /// <summary>
         /// Controlls properly move speed of the entity

@@ -38,6 +38,6 @@ namespace Xonix.Entities.Player
             gridNode.SetSource(_trailNodeSource);
         }
 
-        public void ResetTrail() => _nodesDirections.Clear();
+        public void ClearTrail() => _nodesDirections.Clear();
     } 
 }
