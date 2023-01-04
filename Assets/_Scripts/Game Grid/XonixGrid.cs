@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 
 
@@ -13,52 +14,33 @@ namespace Xonix.Grid
 
         private const int LineCellsCount = 90;
         private const int ColumnCellsCount = 60;
+        private const int InitEarthBorderWigthNodesCount = 4;
+        private const int FullFieldSize = LineCellsCount * ColumnCellsCount;
 
         private const float LineUnitSize = LineCellsCount * CellSize;
         private const float ColumnUnitSize = ColumnCellsCount * CellSize;
-        private const int FieldSize = LineCellsCount * ColumnCellsCount;
+        private const float EarthInitBorderThickness = InitEarthBorderWigthNodesCount * CellSize;
 
-        private const float EarthInitBorderThickness = 4 * CellSize;
         private static readonly Vector2 EarthInitBorderAligment = new Vector2(EarthInitBorderThickness, EarthInitBorderThickness);
-
         private static readonly Vector2 FirstNodePosition = Vector2.zero;
 
         #endregion
+
+        public event Action<float> OnSeaNodesPercentChange;
 
         [SerializeField] private GridNodeSource _seaNodeSource;
         [SerializeField] private GridNodeSource _earthNodeSource;
         [SerializeField] private Camera _mainCamera;
 
-        private readonly Dictionary<Vector2, GridNode> _grid = new Dictionary<Vector2, GridNode>(FieldSize);
+        private readonly Dictionary<Vector2, GridNode> _grid = new Dictionary<Vector2, GridNode>(FullFieldSize);
         private readonly HashSet<GridNode> _seaNodes = new HashSet<GridNode>();
-        
 
         private GridNodeFactory _gridNodeFactory;
         private SquareArea _seaFieldInitArea;
 
+        private int _initSeaNodesCount = 0;
 
 
-        public bool TryToGetNode(Vector2 position, out GridNode node)
-        {
-            return _grid.TryGetValue(position, out node);
-        }
-
-        public Vector2 GetRandomSeaFieldNodePosition()
-        {
-            var nodes = new GridNode[_seaNodes.Count];
-            _seaNodes.CopyTo(nodes);
-
-            return nodes[Randomizer.Next(nodes.Length)].Position;
-        }
-
-        public Vector2 GetFieldTopCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
-
-        public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
-
-        public void RemoveSeaNodes(IEnumerable<GridNode> nodes)
-        {
-            _seaNodes.ExceptWith(nodes);
-        }
 
         private void Init()
         {
@@ -78,7 +60,7 @@ namespace Xonix.Grid
             float x = 0f;
             float y = 0f;
 
-            for (int i = 0; i < FieldSize; i++, x += CellSize)
+            for (int i = 0; i < FullFieldSize; i++, x += CellSize)
             {
                 var nodePosition = new Vector2(x, y);
                 var currentNode = _gridNodeFactory.CreateGridNode(nodePosition);
@@ -101,10 +83,62 @@ namespace Xonix.Grid
                     y += CellSize;
                 }
             }
-            
+
+            _initSeaNodesCount = _seaNodes.Count;
+            print(_initSeaNodesCount);
+
             // TODO: ”брать это от сюда
             _mainCamera.transform.position = new Vector3(LineUnitSize / 2, ColumnUnitSize / 2, -10f) - new Vector3(CellSize / 2, CellSize / 2);
         }
+
+        public void RemoveSeaNodes(IEnumerable<GridNode> seaNodes)
+        {
+            _seaNodes.ExceptWith(seaNodes);
+
+            OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
+        }
+
+        public void ResetSeaField()
+        {
+            var currentNodePosition = _seaFieldInitArea.LeftBottomCornerPosition;
+
+            while (_seaFieldInitArea.IsPositionInArea(currentNodePosition))
+            {
+                var currentNode = _grid[currentNodePosition];
+
+                if (currentNode.State != _seaNodeSource.State)
+                {
+                    _seaNodes.Add(currentNode);
+                    currentNode.SetSource(_seaNodeSource);
+                }
+
+                if (currentNodePosition.x == (LineUnitSize - EarthInitBorderThickness - 1))
+                {
+                    currentNodePosition.x = EarthInitBorderThickness - CellSize;
+                    currentNodePosition.y += CellSize;
+                }
+
+                currentNodePosition.x += CellSize;
+            }
+        }
+
+        public bool TryToGetNode(Vector2 position, out GridNode node)
+        {
+            return _grid.TryGetValue(position, out node);
+        }
+
+        public Vector2 GetRandomSeaFieldNodePosition()
+        {
+            var nodes = new GridNode[_seaNodes.Count];
+            _seaNodes.CopyTo(nodes);
+
+            return nodes[Randomizer.Next(nodes.Length)].Position;
+        }
+
+        public Vector2 GetFieldTopCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
+
+        public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
+
 
 
 

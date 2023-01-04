@@ -18,6 +18,8 @@ namespace Xonix
         private static XonixGame _instance;
 
         private const int StartCountOfSeaEnemies = 3;
+        // A percent of corrupted sea field, when level will be completed
+        private const float TargetFiledCorruptionPercent = 0.05f;
 
         public static event Action OnFieldReload;
         public static event Action OnPlayerLoseLevel;
@@ -36,8 +38,8 @@ namespace Xonix
         private List<Enemy> _seaEnemies;
         private Player _player;
 
-        private int _score = 0;
-        private int _levelNumber = 0;
+        [SerializeField] private int _score = 0;
+        [SerializeField] private int _levelNumber = 0;
 
 
 
@@ -63,6 +65,33 @@ namespace Xonix
             OnPlayerLoseLevel?.Invoke();
         }
 
+        private void CheckForLevelComplete(float currentSeaCorruptionPercent)
+        {
+            if (currentSeaCorruptionPercent >= TargetFiledCorruptionPercent)
+            {
+                print("Reload");
+                IncreaseLevel();
+            }
+        }
+
+        private void IncreaseLevel()
+        {
+            _levelNumber++;
+
+            OnFieldReload?.Invoke();
+
+            _grid.ResetSeaField();
+
+            var newEnemyPosition = _grid.GetRandomSeaFieldNodePosition();
+            var newEnemy = _enemeyFactory.SpawnEnemy(EnemyType.SeaEnemy, newEnemyPosition, _seaEnemySprite);
+            _seaEnemies.Add(newEnemy);
+
+            OnFieldReload += () =>
+            {
+                newEnemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
+            };
+        }
+
         private void SpawnEnemies()
         {
             var enemiesCount = StartCountOfSeaEnemies + _levelNumber;
@@ -73,7 +102,11 @@ namespace Xonix
             {
                 var enemyPosition = _grid.GetRandomSeaFieldNodePosition();
                 var enemy = _enemeyFactory.SpawnEnemy(EnemyType.SeaEnemy, enemyPosition, _seaEnemySprite);
-                OnFieldReload += () => enemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
+
+                OnFieldReload += () => 
+                { 
+                    enemy.transform.position = _grid.GetRandomSeaFieldNodePosition(); 
+                };
 
                 _seaEnemies.Add(enemy);
             }
@@ -82,7 +115,10 @@ namespace Xonix
             var earthEnemyPosition = _grid.GetFieldBottomCenterPosition();
             var earthEnemy = _enemeyFactory.SpawnEnemy(EnemyType.EarthEnemy, earthEnemyPosition, _earthEnemySprite);
 
-            OnFieldReload += () => earthEnemy.transform.position = _grid.GetFieldBottomCenterPosition();
+            OnFieldReload += () =>
+            {
+                earthEnemy.transform.position = _grid.GetFieldBottomCenterPosition();
+            };
         }
 
         private void SpawnPlayer()
@@ -92,11 +128,15 @@ namespace Xonix
             _player = new GameObject($"Player").AddComponent<Player>();
             _player.Init(_inputSystem, playerPosition, _playerSprite);
 
-            OnFieldReload += () => _player.transform.position = _grid.GetFieldTopCenterPosition();
+            OnFieldReload += () =>
+            {
+                _player.StopMoving();
+                _player.transform.position = _grid.GetFieldTopCenterPosition();
+            };
+
+            _player.OnNodesCountCorrupted += (int nodesCount) => _score += nodesCount;
             _player.OnNodeZoneCorrupted += _grid.RemoveSeaNodes;
         }
-
-        public static void AddScore(int scroreValue) => _instance._score += scroreValue;
 
         private void Init()
         {
@@ -104,13 +144,14 @@ namespace Xonix
 
             SpawnPlayer();
             SpawnEnemies();
+
+            _grid.OnSeaNodesPercentChange += CheckForLevelComplete;
         }
 
         public static bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
         {
             return _instance._grid.TryToGetNode(position, out node);
         }
-
 
 
 

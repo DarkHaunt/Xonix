@@ -11,11 +11,11 @@ using Xonix.Grid;
 namespace Xonix.Entities.Player
 {
     using static GridNodeSource;
-    using static StaticData;
 
     public class Player : Entity
     {
         public event Action<IEnumerable<GridNode>> OnNodeZoneCorrupted;
+        public event Action<int> OnNodesCountCorrupted;
 
         private const int StartLifesCount = 3;
 
@@ -26,8 +26,6 @@ namespace Xonix.Entities.Player
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
-
-        private Vector2 _moveDirection;
 
         private int _lifesCount = StartLifesCount;
         [SerializeField] private bool _isTrailing = false;
@@ -72,13 +70,13 @@ namespace Xonix.Entities.Player
 
         protected override void Move()
         {
-            if (_moveDirection == Vector2.zero)
+            if (MoveDirection == Vector2.zero)
                 return;
 
-            var movePosition = Position + (_moveDirection * CellSize);
+            var nextPosition = Position + MoveTranslation;
 
             // If out of field
-            if (!XonixGame.TryToGetNodeWithPosition(movePosition, out GridNode node))
+            if (!XonixGame.TryToGetNodeWithPosition(nextPosition, out GridNode node))
                 return;
 
             switch (node.State)
@@ -96,13 +94,13 @@ namespace Xonix.Entities.Player
                     break;
             }
 
-            transform.position = movePosition;
+            transform.Translate(MoveTranslation);
         }
 
         private void OnSeaNodeStep(GridNode seaNode)
         {
             _isTrailing = true;
-            _trailMarker.MarkNodeAsTrail(seaNode, _moveDirection);
+            _trailMarker.MarkNodeAsTrail(seaNode, MoveDirection);
         }
 
         private void OnEarthNodeStep()
@@ -154,9 +152,10 @@ namespace Xonix.Entities.Player
                     corruptedNodes.UnionWith(_corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions));
             }
 
-            XonixGame.AddScore(corruptedNodesCount);
-
+            // Invoke all data update events
+            OnNodesCountCorrupted?.Invoke(corruptedNodes.Count);
             OnNodeZoneCorrupted?.Invoke(corruptedNodes);
+
             // Delete all trail data
             _trailMarker.ClearTrail();
         }
@@ -169,10 +168,6 @@ namespace Xonix.Entities.Player
                 XonixGame.EndGame();
         }
 
-        private void SetMoveDirection(Vector2 newMoveDirection) => _moveDirection = newMoveDirection;
-
-        private void StopMoving() => _moveDirection = Vector2.zero;
-
 
 
         #region [TEST INPUT SYSTEM]
@@ -181,30 +176,30 @@ namespace Xonix.Entities.Player
         {
             if (Input.GetKey(KeyCode.W))
             {
-                _moveDirection = Vector2.up;
+                SetMoveDirection(Vector2.up);
                 return;
             }
 
             if (Input.GetKey(KeyCode.S))
             {
-                _moveDirection = Vector2.down;
+                SetMoveDirection(Vector2.down);
                 return;
             }
 
             if (Input.GetKey(KeyCode.A))
             {
-                _moveDirection = Vector2.left;
+                SetMoveDirection(Vector2.left);
                 return;
             }
 
             if (Input.GetKey(KeyCode.D))
             {
-                _moveDirection = Vector2.right;
+                SetMoveDirection( Vector2.right);
                 return;
             }
 
 
-            _moveDirection = Vector2.zero;
+            SetMoveDirection(Vector2.zero);
 
         }
 

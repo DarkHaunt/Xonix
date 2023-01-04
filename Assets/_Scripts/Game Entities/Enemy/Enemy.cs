@@ -11,15 +11,14 @@ namespace Xonix.Entities
     public class Enemy : Entity
     {
         [SerializeField] private EnemyBehaviour _enemyBehaviour;
-        private Vector2 _currentDirection;
-
 
 
         protected override void Move()
         {
-            _currentDirection = _enemyBehaviour.GetMoveTranslation(Position, _currentDirection);
+            var newMoveDirection = _enemyBehaviour.GetMoveDirection(Position, MoveDirection, Position + MoveTranslation);
+            SetMoveDirection(newMoveDirection);
 
-            transform.Translate(_currentDirection * CellSize);
+            transform.Translate(MoveTranslation);
 
             if (Position == XonixGame.PlayerPosition)
             {
@@ -30,7 +29,8 @@ namespace Xonix.Entities
 
         public override void Init(Vector2 initPosition, Sprite sprite)
         {
-            _currentDirection = new Vector2(GetRandomSign(), GetRandomSign());
+            var randomMoveDirection = new Vector2(GetRandomSign(), GetRandomSign());
+            SetMoveDirection(randomMoveDirection);
 
             base.Init(initPosition, sprite);
         }

@@ -7,7 +7,6 @@ using UnityEngine;
 namespace Xonix.Entities.Enemies
 {
     using static GridNodeSource;
-    using static StaticData;
 
     public class EnemyBehaviour
     {
@@ -28,11 +27,9 @@ namespace Xonix.Entities.Enemies
 
 
 
-        public Vector2 GetMoveTranslation(Vector2 currentPosition, Vector2 currentMoveDirection)
+        public Vector2 GetMoveDirection(Vector2 currentPosition, Vector2 currentMoveDirection, Vector2 nextNodePosition)
         {
-            var bounceNodePosition = currentPosition + (currentMoveDirection * CellSize);
-
-            if (!XonixGame.TryToGetNodeWithPosition(bounceNodePosition, out GridNode nextNode) || IsNodeHasBorderState(nextNode))
+            if (!XonixGame.TryToGetNodeWithPosition(nextNodePosition, out GridNode nextNode) || IsNodeHasBorderState(nextNode))
                 currentMoveDirection = GetBounceDirection(currentPosition, currentMoveDirection);
             else
             {
@@ -43,8 +40,7 @@ namespace Xonix.Entities.Enemies
                 }
             }
 
-
-            return currentMoveDirection * CellSize;
+            return currentMoveDirection;
         }
 
         private Vector2 GetBounceDirection(Vector2 currentNodePosition, Vector2 currentDirection)
