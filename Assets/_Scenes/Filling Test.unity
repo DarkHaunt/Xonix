@@ -867,10 +867,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 2107759974}
+  _mainCamera: {fileID: 519420031}
   _inputSystem: {fileID: 1678928263}
-  _seaEnemySprite: {fileID: 21300000, guid: 8df0616f03a9c8d4488bc5f27e73d6f5, type: 3}
-  _earthEnemySprite: {fileID: 21300000, guid: bf5350463fb67754caa595a65a3524e8, type: 3}
-  _playerSprite: {fileID: 21300000, guid: f152bb0a931d29b41b03c9815e13c4d8, type: 3}
+  _score: 0
+  _levelNumber: 0
 --- !u!4 &1402016992
 Transform:
   m_ObjectHideFlags: 0
@@ -1093,7 +1093,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _seaNodeSource: {fileID: 11400000, guid: 0563a4367ba4a3249b94989b9f36450e, type: 2}
   _earthNodeSource: {fileID: 11400000, guid: 099f61c50253d904fbf4aa08349a81a3, type: 2}
-  _mainCamera: {fileID: 519420031}
 --- !u!4 &2107759975
 Transform:
   m_ObjectHideFlags: 0

@@ -1,18 +1,22 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine.AddressableAssets;
 using UnityEngine;
 using Xonix.Grid;
 
 
 
-namespace Xonix.Entities.Player
+namespace Xonix.Entities.Players
 {
     /// <summary>
     /// Marks tiles as trail ones
     /// </summary>
     public class TrailMarker
     {
+        private const string TrailNodeSource = "Grid/NodeSource/TrailNodeSource";
+
         private readonly Dictionary<GridNode, Vector2> _nodesDirections = new Dictionary<GridNode, Vector2>();
-        private readonly GridNodeSource _trailNodeSource;
+        private GridNodeSource _trailNodeSource;
 
 
         /// <summary>
@@ -24,13 +28,17 @@ namespace Xonix.Entities.Player
         public IReadOnlyDictionary<GridNode, Vector2> TrailNodesDirections => _nodesDirections;
 
 
+        public TrailMarker() { }
 
-        public TrailMarker(GridNodeSource trailNodeSource)
+        
+        public async Task InitTrailSource()
         {
-            _trailNodeSource = trailNodeSource;
+            var trailNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(TrailNodeSource).Task;
+
+            await trailNodeSourceLoadingTask;
+
+            _trailNodeSource = trailNodeSourceLoadingTask.Result;
         }
-
-
 
         public void MarkNodeAsTrail(GridNode gridNode, Vector2 nodeWalkDireaction)
         {

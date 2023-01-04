@@ -10,7 +10,7 @@ namespace Xonix.Entities.Enemies
 
     public class EnemyBehaviour
     {
-        private static readonly Dictionary<EnemyType, NodeState> BorderNodeType = new Dictionary<EnemyType, NodeState>()
+        private static readonly Dictionary<EnemyType, NodeState> EnemyTypeBorderNodeState = new Dictionary<EnemyType, NodeState>()
         {
             [EnemyType.EarthEnemy] = NodeState.Sea,
             [EnemyType.SeaEnemy] = NodeState.Earth,
@@ -36,7 +36,7 @@ namespace Xonix.Entities.Enemies
                 if (IsNodeTrailState(nextNode))
                 {
                     MonoBehaviour.print("Enemy touched trail");
-                    XonixGame.PlayerLoseLevel();
+                    XonixGame.ReloadLevel();
                 }
             }
 
@@ -77,7 +77,7 @@ namespace Xonix.Entities.Enemies
             return isNodeOutOfGameField;
         }
 
-        private bool IsNodeHasBorderState(GridNode node) => BorderNodeType[_enemyType] == node.State;
+        private bool IsNodeHasBorderState(GridNode node) => EnemyTypeBorderNodeState[_enemyType] == node.State;
 
         private bool IsNodeTrailState(GridNode node) => node.State == NodeState.Trail;
   

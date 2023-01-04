@@ -5,12 +5,13 @@ using UnityEngine;
 
 namespace Xonix.Entities
 {
-    using static StaticData;
+    using static StaticRandomizer;
     using static EnemyBehaviour;
 
     public class Enemy : Entity
     {
-        [SerializeField] private EnemyBehaviour _enemyBehaviour;
+        private EnemyBehaviour _enemyBehaviour;
+
 
 
         protected override void Move()
@@ -23,8 +24,15 @@ namespace Xonix.Entities
             if (Position == XonixGame.PlayerPosition)
             {
                 print("Enemy touched player");
-                XonixGame.PlayerLoseLevel();
+                XonixGame.ReloadLevel();
             }
+        }
+
+        public void Init(EnemyType type, Vector2 initPosition, Sprite sprite)
+        {
+            _enemyBehaviour = new EnemyBehaviour(type);
+
+            Init(initPosition, sprite);
         }
 
         public override void Init(Vector2 initPosition, Sprite sprite)
@@ -33,11 +41,6 @@ namespace Xonix.Entities
             SetMoveDirection(randomMoveDirection);
 
             base.Init(initPosition, sprite);
-        }
-
-        public void SetBehavior(EnemyType enemyType)
-        {
-            _enemyBehaviour = new EnemyBehaviour(enemyType);
         }
     }
 }

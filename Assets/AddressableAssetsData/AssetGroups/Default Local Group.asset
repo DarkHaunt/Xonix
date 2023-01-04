@@ -29,6 +29,18 @@ MonoBehaviour:
     m_Address: Grid/NodeSource/SeaNodeSource
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: bf5350463fb67754caa595a65a3524e8
+    m_Address: Sprites/Entities/Enemies/EarthEnemy
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 8df0616f03a9c8d4488bc5f27e73d6f5
+    m_Address: Sprites/Entities/Enemies/SeaEnemy
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: f152bb0a931d29b41b03c9815e13c4d8
+    m_Address: Sprites/Entities/Player
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c38081ef7bca42041b3d1f3ea4052918, type: 2}
   m_SchemaSet:

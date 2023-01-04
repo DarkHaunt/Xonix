@@ -6,11 +6,13 @@ using System;
 
 namespace Xonix.Grid
 {
-    using static StaticData;
+    using static StaticRandomizer;
 
     public class XonixGrid : MonoBehaviour
     {
         #region [Grid Init Parameters]
+
+        public const float CellSize = 1f;
 
         private const int LineCellsCount = 90;
         private const int ColumnCellsCount = 60;
@@ -30,15 +32,14 @@ namespace Xonix.Grid
 
         [SerializeField] private GridNodeSource _seaNodeSource;
         [SerializeField] private GridNodeSource _earthNodeSource;
-        [SerializeField] private Camera _mainCamera;
 
         private readonly Dictionary<Vector2, GridNode> _grid = new Dictionary<Vector2, GridNode>(FullFieldSize);
         private readonly HashSet<GridNode> _seaNodes = new HashSet<GridNode>();
 
         private GridNodeFactory _gridNodeFactory;
-        private SquareArea _seaFieldInitArea;
+        private SquareArea _seaNodesFieldArea;
 
-        private int _initSeaNodesCount = 0;
+        private int _initSeaNodesCount = 0; // Count of sea nodes in the start of level
 
 
 
@@ -47,7 +48,7 @@ namespace Xonix.Grid
             _gridNodeFactory = new GridNodeFactory();
 
             // Area of grid, which will be filled by sea tiles
-            _seaFieldInitArea = new SquareArea
+            _seaNodesFieldArea = new SquareArea
                 (
                     leftBottomCornerPosition:
                         FirstNodePosition + EarthInitBorderAligment,
@@ -65,7 +66,7 @@ namespace Xonix.Grid
                 var nodePosition = new Vector2(x, y);
                 var currentNode = _gridNodeFactory.CreateGridNode(nodePosition);
 
-                var isInSeaInitArea = _seaFieldInitArea.IsPositionInArea(nodePosition);
+                var isInSeaInitArea = _seaNodesFieldArea.IsPositionInArea(nodePosition);
 
                 var nodeSource = (isInSeaInitArea) ? _seaNodeSource : _earthNodeSource;
                 currentNode.SetSource(nodeSource);
@@ -85,24 +86,15 @@ namespace Xonix.Grid
             }
 
             _initSeaNodesCount = _seaNodes.Count;
-            print(_initSeaNodesCount);
 
-            // TODO: ”брать это от сюда
-            _mainCamera.transform.position = new Vector3(LineUnitSize / 2, ColumnUnitSize / 2, -10f) - new Vector3(CellSize / 2, CellSize / 2);
+            XonixGame.OnFieldReload += ResetSeaField;
         }
 
-        public void RemoveSeaNodes(IEnumerable<GridNode> seaNodes)
+        private void ResetSeaField()
         {
-            _seaNodes.ExceptWith(seaNodes);
+            var currentNodePosition = _seaNodesFieldArea.LeftBottomCornerPosition;
 
-            OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
-        }
-
-        public void ResetSeaField()
-        {
-            var currentNodePosition = _seaFieldInitArea.LeftBottomCornerPosition;
-
-            while (_seaFieldInitArea.IsPositionInArea(currentNodePosition))
+            while (_seaNodesFieldArea.IsPositionInArea(currentNodePosition))
             {
                 var currentNode = _grid[currentNodePosition];
 
@@ -122,23 +114,32 @@ namespace Xonix.Grid
             }
         }
 
+        public void RemoveSeaNodes(IEnumerable<GridNode> seaNodes)
+        {
+            _seaNodes.ExceptWith(seaNodes);
+
+            OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
+        }
+
         public bool TryToGetNode(Vector2 position, out GridNode node)
         {
             return _grid.TryGetValue(position, out node);
-        }
-
-        public Vector2 GetRandomSeaFieldNodePosition()
-        {
-            var nodes = new GridNode[_seaNodes.Count];
-            _seaNodes.CopyTo(nodes);
-
-            return nodes[Randomizer.Next(nodes.Length)].Position;
         }
 
         public Vector2 GetFieldTopCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
 
         public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
 
+        public Vector2 GetGridCenter() => new Vector2(LineUnitSize / 2, ColumnUnitSize / 2) - new Vector2(CellSize / 2, CellSize / 2);
+
+        public Vector2 GetRandomSeaFieldNodePosition()
+        {
+            var nodes = new GridNode[_seaNodes.Count];
+            _seaNodes.CopyTo(nodes);
+
+            var randomIndex = Randomizer.Next(nodes.Length);
+            return nodes[randomIndex].Position;
+        }
 
 
 

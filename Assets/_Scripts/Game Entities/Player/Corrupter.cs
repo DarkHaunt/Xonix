@@ -1,39 +1,51 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+using UnityEngine.AddressableAssets;
 using UnityEngine;
 using Xonix.Grid;
-using System;
 
 
 
-namespace Xonix.Entities.Player
+namespace Xonix.Entities.Players
 {
-    using static StaticData;
+    using static XonixGrid;
 
     /// <summary>
     /// Marks zone without enemy by the 
     /// </summary>
     public class Corrupter
     {
-        private readonly GridNodeSource _corruptedNodeSource;
-        private readonly GridNodeSource _nonCorruptedNodeSource;
+        private const string EarthNodeSource = "Grid/NodeSource/EarthNodeSource";
+        private const string SeaNodeSource = "Grid/NodeSource/SeaNodeSource";
 
         private readonly Vector2[] _neighboursTemplates = new Vector2[4] // Convenient node neighbours position
         {
             new Vector2(0f, CellSize),
             new Vector2(0f, -CellSize),
             new Vector2(CellSize, 0f),
-            new Vector2(-CellSize, 0f),
+            new Vector2(-CellSize, 0f)
         };
 
+        private GridNodeSource _corruptedNodeSource;
+        private GridNodeSource _nonCorruptedNodeSource;
+
+ 
+
+        public Corrupter() { }
 
 
-        public Corrupter(GridNodeSource corruptedNodeSource, GridNodeSource nonCorruptedNodeSource)
+
+        public async Task InitNodeSourcesForCorruptionAsync()
         {
-            _corruptedNodeSource = corruptedNodeSource;
-            _nonCorruptedNodeSource = nonCorruptedNodeSource;
+            var earthNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(EarthNodeSource).Task;
+            var seaNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(SeaNodeSource).Task;
+
+            await Task.WhenAll(earthNodeSourceLoadingTask, seaNodeSourceLoadingTask);
+
+            _corruptedNodeSource = earthNodeSourceLoadingTask.Result;
+            _nonCorruptedNodeSource = seaNodeSourceLoadingTask.Result;
         }
-
-
 
         /// <summary>
         /// Mark closed with corrupted or grid border zone with corruption source
@@ -87,30 +99,23 @@ namespace Xonix.Entities.Player
         /// </summary>
         /// <param name="nodes"></param>
         /// <returns>Count of corrupted nodes</returns>
-        public int CorruptNodes(IEnumerable<GridNode> nodes)
+        public void CorruptNodes(IEnumerable<GridNode> nodes)
         {
-            int nodesCount = 0;
-
             foreach (var node in nodes)
-            {
                 CorruptNode(node);
-                nodesCount++;
-            }
-
-            return nodesCount;
         }
 
-        private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
-
         /// <summary>
-        /// Decorrupts all nodes in collection
+        /// Immidietry decorrupts all nodes in collection
         /// </summary>
         /// <param name="nodes"></param>
-        public void ReleaseNodes(IEnumerable<GridNode> nodes)
+        public void DecorruptNodes(IEnumerable<GridNode> nodes)
         {
             foreach (var node in nodes)
                 node.SetSource(_nonCorruptedNodeSource);
         }
+
+        private void CorruptNode(GridNode node) => node.SetSource(_corruptedNodeSource);
 
         private bool IsZoneFreeOfEnemies(ISet<Vector2> zoneNodesPositions)
         {

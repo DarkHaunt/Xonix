@@ -1,11 +1,12 @@
 using UnityEngine;
 using System.Collections;
+using Xonix.Grid;
 
 
 
 namespace Xonix.Entities
 {
-    using static StaticData;
+    using static XonixGrid;
 
     [RequireComponent(typeof(SpriteRenderer))]
     public abstract class Entity : MonoBehaviour
