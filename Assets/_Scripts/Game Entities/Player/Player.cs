@@ -26,6 +26,10 @@ namespace Xonix.Entities.Players
 
 
 
+        public int Lifes => _lifesCount;
+
+
+
         public async void Init(FourDirectionInputTranslator inputTranslator, Vector2 initPosition, Sprite sprite)
         {
             InitMovingSystem(inputTranslator);
@@ -157,6 +161,7 @@ namespace Xonix.Entities.Players
         private void DecreaseLifeCount()
         {
             _lifesCount--;
+            print("Pla " + _lifesCount);
 
             if (_lifesCount == 0)
                 OnLifesEnd?.Invoke();

@@ -6,6 +6,7 @@ using Xonix.Entities.Players;
 using Xonix.PlayerInput;
 using Xonix.Entities;
 using Xonix.Grid;
+using Xonix.UI;
 using UnityEngine;
 
 
@@ -30,6 +31,7 @@ namespace Xonix
 
         [SerializeField] private XonixGrid _grid;
         [SerializeField] private FourDirectionInputTranslator _inputSystem;
+        [SerializeField] private GamePrintUI _printUI;
         [SerializeField] private Camera _mainCamera;
 
 
@@ -39,7 +41,7 @@ namespace Xonix
         private Player _player;
 
         [SerializeField] private int _score = 0;
-        [SerializeField] private int _levelNumber = 0;
+        [SerializeField] private int _levelNumber = 1;
         [SerializeField] private float _timeForLevelLeft = LevelEndTimeSeconds;
 
 
@@ -62,12 +64,14 @@ namespace Xonix
 
         public static void ReloadLevel()
         {
-            OnFieldReload?.Invoke();
             OnLevelReloading?.Invoke();
+            OnFieldReload?.Invoke();
         }
 
         private void CheckForLevelComplete(float currentSeaCorruptionPercent)
         {
+            _printUI.SetFillPercent(currentSeaCorruptionPercent);
+
             if (currentSeaCorruptionPercent >= TargetFiledCorruptionPercent)
             {
                 print("Level Done");
@@ -97,11 +101,18 @@ namespace Xonix
             OnFieldReload += ResetLevelTimer;
 
             StartCoroutine(LevelTimerCoroutine());
+
+            _printUI.SetTimeSeconds(_timeForLevelLeft);
+            _printUI.SetLevelNumber(_levelNumber);
+            _printUI.SetLifesNumber(_player.Lifes);
         }
 
         private void IncreaseLevel()
         {
             _levelNumber++;
+
+            _printUI.SetLevelNumber(_levelNumber);
+            _printUI.SetFillPercent(0f);
 
             OnFieldReload?.Invoke();
 
@@ -127,12 +138,16 @@ namespace Xonix
             {
                 _player.StopMoving();
                 _player.transform.position = _grid.GetFieldTopCenterPosition();
+
+                print("Game " + _player.Lifes);
+                _printUI.SetLifesNumber(_player.Lifes);
             };
 
             _player.OnNodesCorrupted += (corruptedNodes) =>
             {
                 _grid.RemoveSeaNodes(corruptedNodes);
                 _score += corruptedNodes.Count;
+                _printUI.SetScoreNumber(_score);
             };
 
             _player.OnLifesEnd += EndGame;
@@ -155,18 +170,6 @@ namespace Xonix
 
         private void ResetLevelTimer() => _timeForLevelLeft = LevelEndTimeSeconds;
 
-        private void Pause()
-        {
-            if(Time.timeScale == 1)
-            {
-                Time.timeScale = 0;
-            }
-            else
-            {
-                Time.timeScale = 1;
-            }    
-        }
-
         private IEnumerator LevelTimerCoroutine()
         {
             while (_timeForLevelLeft > 0)
@@ -174,6 +177,7 @@ namespace Xonix
                 yield return OneSecondYield;
 
                 _timeForLevelLeft -= 1f;
+                _printUI.SetTimeSeconds(_timeForLevelLeft);
             }
 
             EndGame();
@@ -196,15 +200,6 @@ namespace Xonix
             #endregion
 
             Init();
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                print("Pause");
-                Pause();
-            }
         }
     }
 }
