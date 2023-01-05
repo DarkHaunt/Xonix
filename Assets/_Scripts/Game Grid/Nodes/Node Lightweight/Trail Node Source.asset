@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daa5bf48169fabb4da16600dc64a0fc3, type: 3}
   m_Name: Trail Node Source
   m_EditorClassIdentifier: 
+  _nodeMaterial: {fileID: 2100000, guid: 0388f294f66dd4c499b70718bd960ac7, type: 2}
   _nodeSprite: {fileID: 21300000, guid: ef7ce44a49fe8c240990a16dd78b20a8, type: 3}
   _nodeState: 256

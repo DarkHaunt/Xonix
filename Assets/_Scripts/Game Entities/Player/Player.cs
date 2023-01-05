@@ -161,7 +161,6 @@ namespace Xonix.Entities.Players
         private void DecreaseLifeCount()
         {
             _lifesCount--;
-            print("Pla " + _lifesCount);
 
             if (_lifesCount == 0)
                 OnLifesEnd?.Invoke();

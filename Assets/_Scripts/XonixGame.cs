@@ -21,9 +21,9 @@ namespace Xonix
 
         private const int StartCountOfSeaEnemies = 3;
         private const float TargetFiledCorruptionPercent = 0.05f; // A percent of corrupted sea field, when level will be completed
-        private const float LevelEndTimeSeconds = 10f;
+        private const float GameEndTime = 90; // One and a half hour of max game time
 
-        private readonly YieldInstruction OneSecondYield = new WaitForSeconds(1f); // Cached for optimization
+        private readonly YieldInstruction OneMinuteYield = new WaitForSeconds(60f); // Cached for optimization
 
         public static event Action OnFieldReload;
         public static event Action OnLevelReloading;
@@ -42,7 +42,7 @@ namespace Xonix
 
         [SerializeField] private int _score = 0;
         [SerializeField] private int _levelNumber = 1;
-        [SerializeField] private float _timeForLevelLeft = LevelEndTimeSeconds;
+        [SerializeField] private float _minutesForLevelLeft = GameEndTime;
 
 
 
@@ -98,11 +98,9 @@ namespace Xonix
             _mainCamera.transform.position = _grid.GetGridCenter();
             _mainCamera.transform.position += new Vector3(0f, 0f, -10f);
 
-            OnFieldReload += ResetLevelTimer;
-
             StartCoroutine(LevelTimerCoroutine());
 
-            _printUI.SetTimeSeconds(_timeForLevelLeft);
+            _printUI.SetTimeSeconds(_minutesForLevelLeft);
             _printUI.SetLevelNumber(_levelNumber);
             _printUI.SetLifesNumber(_player.Lifes);
         }
@@ -138,8 +136,6 @@ namespace Xonix
             {
                 _player.StopMoving();
                 _player.transform.position = _grid.GetFieldTopCenterPosition();
-
-                print("Game " + _player.Lifes);
                 _printUI.SetLifesNumber(_player.Lifes);
             };
 
@@ -168,16 +164,14 @@ namespace Xonix
             return _instance._grid.TryToGetNode(position, out node);
         }
 
-        private void ResetLevelTimer() => _timeForLevelLeft = LevelEndTimeSeconds;
-
         private IEnumerator LevelTimerCoroutine()
         {
-            while (_timeForLevelLeft > 0)
+            while (_minutesForLevelLeft > 0)
             {
-                yield return OneSecondYield;
+                yield return OneMinuteYield;
 
-                _timeForLevelLeft -= 1f;
-                _printUI.SetTimeSeconds(_timeForLevelLeft);
+                _minutesForLevelLeft -= 1f;
+                _printUI.SetTimeSeconds(_minutesForLevelLeft);
             }
 
             EndGame();

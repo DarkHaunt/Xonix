@@ -23,6 +23,7 @@ namespace Xonix.Grid
         {
             _nodeSource = newNodeSource;
             _spriteRenderer.sprite = _nodeSource.NodeSprite;
+            _spriteRenderer.material = _nodeSource.Material;
         }
 
 
