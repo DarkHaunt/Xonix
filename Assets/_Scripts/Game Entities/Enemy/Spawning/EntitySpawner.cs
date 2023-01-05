@@ -56,12 +56,12 @@ namespace Xonix.Entities
             return enemy;
         }
 
-        public Player SpawnPlayer(FourDirectionInputTranslator inputSystem)
+        public async Task<Player> SpawnPlayer(FourDirectionInputTranslator inputSystem)
         {
             var playerPosition = _grid.GetFieldTopCenterPosition();
 
             var player = new GameObject($"Player").AddComponent<Player>();
-            player.Init(inputSystem, playerPosition, _playerSprite);
+            await player.Init(inputSystem, playerPosition, _playerSprite);
 
             return player;
         }

@@ -8,8 +8,7 @@ using Xonix.Entities;
 using Xonix.Grid;
 using Xonix.UI;
 using UnityEngine;
-
-
+using System.Threading.Tasks;
 
 namespace Xonix
 {
@@ -25,7 +24,7 @@ namespace Xonix
 
         private readonly YieldInstruction OneMinuteYield = new WaitForSeconds(60f); // Cached for optimization
 
-        public static event Action OnFieldReload;
+        public static event Action OnLevelIncrease;
         public static event Action OnLevelReloading;
 
 
@@ -65,7 +64,6 @@ namespace Xonix
         public static void ReloadLevel()
         {
             OnLevelReloading?.Invoke();
-            OnFieldReload?.Invoke();
         }
 
         private void CheckForLevelComplete(float currentSeaCorruptionPercent)
@@ -88,12 +86,12 @@ namespace Xonix
 
             await _entitySpawner.Init();
 
+            await SpawnPlayer();
+
             SpawnEarthEnemy();
 
             for (int i = 0; i < StartCountOfSeaEnemies; i++)
                 SpawnSeaEnemy();
-
-            SpawnPlayer();
 
             _mainCamera.transform.position = _grid.GetGridCenter();
             _mainCamera.transform.position += new Vector3(0f, 0f, -10f);
@@ -112,7 +110,7 @@ namespace Xonix
             _printUI.SetLevelNumber(_levelNumber);
             _printUI.SetFillPercent(0f);
 
-            OnFieldReload?.Invoke();
+            OnLevelIncrease?.Invoke();
 
             SpawnSeaEnemy();
         }
@@ -122,21 +120,31 @@ namespace Xonix
             var seaEnemy = _entitySpawner.SpawnEnemy(EnemyType.SeaEnemy);
             _seaEnemies.Add(seaEnemy);
 
-            OnFieldReload += () =>
+            OnLevelReloading += () =>
             {
                 seaEnemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
             };
         }
 
-        private void SpawnPlayer()
+        private async Task SpawnPlayer()
         {
-            _player = _entitySpawner.SpawnPlayer(_inputSystem);
+            var playerSpawnTask = _entitySpawner.SpawnPlayer(_inputSystem);
 
-            OnFieldReload += () =>
+            await playerSpawnTask;
+
+            _player = playerSpawnTask.Result;
+
+            OnLevelReloading += () =>
             {
                 _player.StopMoving();
                 _player.transform.position = _grid.GetFieldTopCenterPosition();
                 _printUI.SetLifesNumber(_player.Lifes);
+            };
+
+            OnLevelIncrease += () =>
+            {
+                _player.StopMoving();
+                _player.transform.position = _grid.GetFieldTopCenterPosition();
             };
 
             _player.OnNodesCorrupted += (corruptedNodes) =>
@@ -153,7 +161,7 @@ namespace Xonix
         {
             var earthEnemy = _entitySpawner.SpawnEnemy(EnemyType.EarthEnemy);
 
-            OnFieldReload += () =>
+            OnLevelReloading += () =>
             {
                 earthEnemy.transform.position = _grid.GetFieldBottomCenterPosition();
             };

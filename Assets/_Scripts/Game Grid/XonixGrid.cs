@@ -87,7 +87,7 @@ namespace Xonix.Grid
 
             _initSeaNodesCount = _seaNodes.Count;
 
-            XonixGame.OnFieldReload += ResetSeaField;
+            XonixGame.OnLevelIncrease += ResetSeaField;
         }
 
         private void ResetSeaField()

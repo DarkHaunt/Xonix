@@ -30,7 +30,7 @@ namespace Xonix.Entities.Players
 
 
 
-        public async void Init(FourDirectionInputTranslator inputTranslator, Vector2 initPosition, Sprite sprite)
+        public async Task Init(FourDirectionInputTranslator inputTranslator, Vector2 initPosition, Sprite sprite)
         {
             InitMovingSystem(inputTranslator);
             Init(initPosition, sprite);

@@ -19,6 +19,6 @@ namespace Xonix.UI
         public void SetLifesNumber(int lifesNumber) => _lifesNumber.text = $"{lifesNumber}";
         public void SetLevelNumber(int levelNumber) => _levelNumber.text = $"{levelNumber}";
         public void SetTimeSeconds(float seconds) => _timeLeftSeconds.text = $"{(int)seconds}";
-        public void SetFillPercent(float percent) => _fillPercent.text = $"{(int)(percent * 100)} %";
+        public void SetFillPercent(float percent) => _fillPercent.text = $"{(int)(percent * 100)}%";
     } 
 }
