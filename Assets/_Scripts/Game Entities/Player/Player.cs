@@ -172,7 +172,7 @@ namespace Xonix.Entities.Players
 
         private void Update()
         {
-            if (Input.GetKey(KeyCode.W))
+           /* if (Input.GetKey(KeyCode.W))
             {
                 SetMoveDirection(Vector2.up);
                 return;
@@ -198,7 +198,7 @@ namespace Xonix.Entities.Players
 
 
             SetMoveDirection(Vector2.zero);
-
+*/
         }
 
         #endregion
