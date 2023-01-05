@@ -29,8 +29,9 @@ namespace Xonix
 
 
         [SerializeField] private XonixGrid _grid;
-        [SerializeField] private Camera _mainCamera;
         [SerializeField] private FourDirectionInputTranslator _inputSystem;
+        [SerializeField] private Camera _mainCamera;
+
 
         private EntitySpawner _entitySpawner;
 
@@ -89,12 +90,13 @@ namespace Xonix
                 SpawnSeaEnemy();
 
             SpawnPlayer();
-            StartCoroutine(LevelTimerCoroutine());
 
             _mainCamera.transform.position = _grid.GetGridCenter();
             _mainCamera.transform.position += new Vector3(0f, 0f, -10f);
 
             OnFieldReload += ResetLevelTimer;
+
+            StartCoroutine(LevelTimerCoroutine());
         }
 
         private void IncreaseLevel()
@@ -153,6 +155,18 @@ namespace Xonix
 
         private void ResetLevelTimer() => _timeForLevelLeft = LevelEndTimeSeconds;
 
+        private void Pause()
+        {
+            if(Time.timeScale == 1)
+            {
+                Time.timeScale = 0;
+            }
+            else
+            {
+                Time.timeScale = 1;
+            }    
+        }
+
         private IEnumerator LevelTimerCoroutine()
         {
             while (_timeForLevelLeft > 0)
@@ -182,6 +196,15 @@ namespace Xonix
             #endregion
 
             Init();
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                print("Pause");
+                Pause();
+            }
         }
     }
 }
