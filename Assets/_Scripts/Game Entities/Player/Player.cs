@@ -13,10 +13,11 @@ namespace Xonix.Entities.Players
 
     public class Player : Entity
     {
-        public event Action<ISet<GridNode>> OnNodesCorrupted;
-        public event Action OnLifesEnd;
-
         private const int StartLifesCount = 3;
+
+
+        public event Action<ISet<GridNode>> OnNodesCorrupted;
+        public event Action OnLivesEnd;
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
@@ -33,15 +34,15 @@ namespace Xonix.Entities.Players
         public async Task Init(FourDirectionInputTranslator inputTranslator, Vector2 initPosition, Sprite sprite)
         {
             InitMovingSystem(inputTranslator);
-            Init(initPosition, sprite);
+            base.Init(initPosition, sprite);
             
             _trailMarker = new TrailMarker();
             _corrupter = new Corrupter();
 
             await Task.WhenAll(_trailMarker.InitTrailSource(), _corrupter.InitNodeSourcesForCorruptionAsync());
 
-            XonixGame.OnLevelReloading += DecreaseLifeCount;
-            XonixGame.OnLevelReloading += () =>
+            XonixGame.OnLevelLosen += DecreaseLifeCount;
+            XonixGame.OnLevelReloaded += () =>
             {
                 _isTrailing = false;
 
@@ -51,15 +52,10 @@ namespace Xonix.Entities.Players
             };
         }
 
-        protected override void Move()
+        public override void Move(GridNode node)
         {
+            // For optimization
             if (MoveDirection == Vector2.zero)
-                return;
-
-            var nextPosition = Position + MoveTranslation;
-
-            // If out of field
-            if (!XonixGame.TryToGetNodeWithPosition(nextPosition, out GridNode node))
                 return;
 
             switch (node.State)
@@ -80,6 +76,8 @@ namespace Xonix.Entities.Players
             transform.Translate(MoveTranslation);
         }
 
+        public override void OnOutOfField() => StopMoving();
+
         private void OnSeaNodeStep(GridNode seaNode)
         {
             _isTrailing = true;
@@ -92,7 +90,6 @@ namespace Xonix.Entities.Players
                 return;
 
             _isTrailing = false;
-
             CorruptZonesAttachedToTrail();
         }
 
@@ -100,7 +97,7 @@ namespace Xonix.Entities.Players
         {
             print("Player loses because stepped on his trail");
 
-            XonixGame.ReloadLevel();
+            StepOnTrailNode();
         }
 
         /// <summary>
@@ -124,16 +121,15 @@ namespace Xonix.Entities.Players
                 var node = nodeKeyDirectionValue.Key;
                 var nodeWalkDirection = nodeKeyDirectionValue.Value;
 
-
                 var firstNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeClockwise();
 
                 if (!checkedNodePositions.Contains(firstNeighborNodePosition))
-                    corruptedNodes.UnionWith(_corrupter.CorruptZone(firstNeighborNodePosition, checkedNodePositions));
+                    corruptedNodes.UnionWith(_corrupter.GetCorruptedZone(firstNeighborNodePosition, checkedNodePositions));
 
                 var secondNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeCounterClockwise();
 
                 if (!checkedNodePositions.Contains(secondNeighborNodePosition))
-                    corruptedNodes.UnionWith(_corrupter.CorruptZone(secondNeighborNodePosition, checkedNodePositions));
+                    corruptedNodes.UnionWith(_corrupter.GetCorruptedZone(secondNeighborNodePosition, checkedNodePositions));
             }
 
             // Notify for each node, that has been corrupted
@@ -163,7 +159,7 @@ namespace Xonix.Entities.Players
             _lifesCount--;
 
             if (_lifesCount == 0)
-                OnLifesEnd?.Invoke();
+                OnLivesEnd?.Invoke();
         }
 
 
@@ -172,7 +168,7 @@ namespace Xonix.Entities.Players
 
         private void Update()
         {
-           /* if (Input.GetKey(KeyCode.W))
+            if (Input.GetKey(KeyCode.W))
             {
                 SetMoveDirection(Vector2.up);
                 return;
@@ -192,13 +188,13 @@ namespace Xonix.Entities.Players
 
             if (Input.GetKey(KeyCode.D))
             {
-                SetMoveDirection( Vector2.right);
+                SetMoveDirection(Vector2.right);
                 return;
             }
 
 
             SetMoveDirection(Vector2.zero);
-*/
+
         }
 
         #endregion

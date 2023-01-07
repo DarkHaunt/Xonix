@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Xonix.Grid
 {
+    /// <summary>
+    /// The init data for nodes
+    /// </summary>
     [CreateAssetMenu(fileName = "Node Source", menuName = "Grid/NodeSource", order = 51)]
     public class GridNodeSource : ScriptableObject
     {

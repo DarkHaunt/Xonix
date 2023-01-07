@@ -37,6 +37,7 @@ namespace Xonix.Grid
         private readonly HashSet<GridNode> _seaNodes = new HashSet<GridNode>();
 
         private GridNodeFactory _gridNodeFactory;
+
         private SquareArea _seaNodesFieldArea;
 
         private int _initSeaNodesCount = 0; // Count of sea nodes in the start of level
@@ -58,10 +59,9 @@ namespace Xonix.Grid
                 );
 
 
-            float x = 0f;
-            float y = 0f;
 
-            for (int i = 0; i < FullFieldSize; i++, x += CellSize)
+            int index = 0;
+            for (float x = 0f, y = 0f; index < FullFieldSize; index++, x += CellSize)
             {
                 var nodePosition = new Vector2(x, y);
                 var currentNode = _gridNodeFactory.CreateGridNode(nodePosition);
@@ -87,7 +87,7 @@ namespace Xonix.Grid
 
             _initSeaNodesCount = _seaNodes.Count;
 
-            XonixGame.OnLevelIncrease += ResetSeaField;
+            XonixGame.OnLevelCompleted += ResetSeaField;
         }
 
         private void ResetSeaField()
@@ -121,7 +121,7 @@ namespace Xonix.Grid
             OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
         }
 
-        public bool TryToGetNode(Vector2 position, out GridNode node)
+        public bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
         {
             return _grid.TryGetValue(position, out node);
         }
@@ -131,6 +131,8 @@ namespace Xonix.Grid
         public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
 
         public Vector2 GetGridCenter() => new Vector2(LineUnitSize / 2, ColumnUnitSize / 2) - new Vector2(CellSize / 2, CellSize / 2);
+
+        public Vector2 GetGridLeftCenterPosition() => new Vector2(FirstNodePosition.x - CellSize / 2, Mathf.Round(ColumnUnitSize - CellSize) / 2);
 
         public Vector2 GetRandomSeaFieldNodePosition()
         {

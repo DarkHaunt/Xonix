@@ -1,6 +1,6 @@
 using UnityEngine;
-using System.Collections;
 using Xonix.Grid;
+using System;
 
 
 
@@ -11,9 +11,7 @@ namespace Xonix.Entities
     [RequireComponent(typeof(SpriteRenderer))]
     public abstract class Entity : MonoBehaviour
     {
-        private const float MoveTimeDelaySeconds = 0.03f;
-        private static readonly YieldInstruction MoveTimeYield = new WaitForSeconds(MoveTimeDelaySeconds);
-
+        public event Action OnTrailNodeStepped;
 
         [SerializeField] private SpriteRenderer _spriteRenderer;
         private Vector2 _moveDirection;
@@ -21,12 +19,15 @@ namespace Xonix.Entities
 
 
         public Vector2 Position => transform.position;
-        public Vector2 MoveDirection => _moveDirection;
-        public Vector2 MoveTranslation => _moveDirection * CellSize;
+        public Vector2 NextPosition => Position + MoveTranslation;
+        protected Vector2 MoveTranslation => _moveDirection * CellSize;
+        protected Vector2 MoveDirection => _moveDirection;
 
 
 
-        protected abstract void Move();
+        public abstract void Move(GridNode node);
+
+        public abstract void OnOutOfField();
 
         public virtual void Init(Vector2 initPosition, Sprite sprite)
         {
@@ -34,26 +35,12 @@ namespace Xonix.Entities
             _spriteRenderer.sprite = sprite;
 
             transform.position = initPosition;
-
-            StartCoroutine(MoveCoroutine());
         }
+
+        protected void StepOnTrailNode() => OnTrailNodeStepped?.Invoke();
+
+        public void StopMoving() => SetMoveDirection(Vector2.zero);
 
         protected void SetMoveDirection(Vector2 newDirection) => _moveDirection = newDirection;
-
-        public void StopMoving() => _moveDirection = Vector2.zero;
-
-        /// <summary>
-        /// Controlls properly move speed of the entity
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator MoveCoroutine()
-        {
-            while (true)
-            {
-                yield return MoveTimeYield;
-
-                Move();
-            }
-        }
     }
 }

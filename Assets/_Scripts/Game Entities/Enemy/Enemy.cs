@@ -1,5 +1,6 @@
 using Xonix.Entities.Enemies;
 using UnityEngine;
+using Xonix.Grid;
 
 
 
@@ -7,6 +8,7 @@ namespace Xonix.Entities
 {
     using static StaticRandomizer;
     using static EnemyBehaviour;
+    using static GridNodeSource;
 
     public class Enemy : Entity
     {
@@ -14,19 +16,18 @@ namespace Xonix.Entities
 
 
 
-        protected override void Move()
+        public override void Move(GridNode node)
         {
-            var newMoveDirection = _enemyBehaviour.GetMoveDirection(Position, MoveDirection, Position + MoveTranslation);
-            SetMoveDirection(newMoveDirection);
+            if (_enemyBehaviour.IsNodeHasBorderState(node))
+                SetMoveDirection(_enemyBehaviour.GetBounceDirection(Position, MoveDirection));
 
             transform.Translate(MoveTranslation);
 
-            if (Position == XonixGame.PlayerPosition)
-            {
-                print("Enemy touched player");
-                XonixGame.ReloadLevel();
-            }
+            if (node.State == NodeState.Trail)
+                StepOnTrailNode();
         }
+
+        public override void OnOutOfField() => SetMoveDirection(_enemyBehaviour.GetBounceDirection(Position, MoveDirection));
 
         public void Init(EnemyType type, Vector2 initPosition, Sprite sprite)
         {

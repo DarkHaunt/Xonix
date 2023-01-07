@@ -10,6 +10,9 @@ namespace Xonix.Entities.Enemies
 
     public class EnemyBehaviour
     {
+        /// <summary>
+        /// A node state, that this enemy type perceives as border, and bounce from it
+        /// </summary>
         private static readonly Dictionary<EnemyType, NodeState> EnemyTypeBorderNodeState = new Dictionary<EnemyType, NodeState>()
         {
             [EnemyType.EarthEnemy] = NodeState.Sea,
@@ -27,29 +30,13 @@ namespace Xonix.Entities.Enemies
 
 
 
-        public Vector2 GetMoveDirection(Vector2 currentPosition, Vector2 currentMoveDirection, Vector2 nextNodePosition)
-        {
-            if (!XonixGame.TryToGetNodeWithPosition(nextNodePosition, out GridNode nextNode) || IsNodeHasBorderState(nextNode))
-                currentMoveDirection = GetBounceDirection(currentPosition, currentMoveDirection);
-            else
-            {
-                if (IsNodeTrailState(nextNode))
-                {
-                    MonoBehaviour.print("Enemy touched trail");
-                    XonixGame.ReloadLevel();
-                }
-            }
-
-            return currentMoveDirection;
-        }
-
-        private Vector2 GetBounceDirection(Vector2 currentNodePosition, Vector2 currentDirection)
+        public Vector2 GetBounceDirection(Vector2 currentNodePosition, Vector2 currentDirection)
         {
             var firstNeighbourPosition = currentNodePosition + new Vector2(currentDirection.x, 0f);
             var secondNeighbourPosition = currentNodePosition + new Vector2(0f, currentDirection.y);
 
-            var firstNeighbourNodeIsBorder = IsPositionBounceBorder(firstNeighbourPosition);
-            var secondNeighbourNodeIsBorder = IsPositionBounceBorder(secondNeighbourPosition);
+            var firstNeighbourNodeIsBorder = IsBorderInPosition(firstNeighbourPosition);
+            var secondNeighbourNodeIsBorder = IsBorderInPosition(secondNeighbourPosition);
 
             // If moving IN angle - bounce in opposite direction
             if (firstNeighbourNodeIsBorder && secondNeighbourNodeIsBorder)
@@ -67,7 +54,7 @@ namespace Xonix.Entities.Enemies
             return new Vector2(currentDirection.x, -currentDirection.y);
         }
 
-        private bool IsPositionBounceBorder(Vector2 position)
+        private bool IsBorderInPosition(Vector2 position)
         {
             var isNodeOutOfGameField = !XonixGame.TryToGetNodeWithPosition(position, out GridNode node);
 
@@ -77,10 +64,8 @@ namespace Xonix.Entities.Enemies
             return isNodeOutOfGameField;
         }
 
-        private bool IsNodeHasBorderState(GridNode node) => EnemyTypeBorderNodeState[_enemyType] == node.State;
+        public bool IsNodeHasBorderState(GridNode node) => EnemyTypeBorderNodeState[_enemyType] == node.State;
 
-        private bool IsNodeTrailState(GridNode node) => node.State == NodeState.Trail;
-  
 
 
         public enum EnemyType

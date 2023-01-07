@@ -18,7 +18,8 @@ namespace Xonix.Entities.Players
         private readonly Dictionary<GridNode, Vector2> _nodesDirections = new Dictionary<GridNode, Vector2>();
         private GridNodeSource _trailNodeSource;
 
-
+        
+        
         /// <summary>
         /// Key - Nodes
         /// <para>
@@ -27,10 +28,12 @@ namespace Xonix.Entities.Players
         /// </summary>
         public IReadOnlyDictionary<GridNode, Vector2> TrailNodesDirections => _nodesDirections;
 
+        
 
         public TrailMarker() { }
 
         
+
         public async Task InitTrailSource()
         {
             var trailNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(TrailNodeSource).Task;

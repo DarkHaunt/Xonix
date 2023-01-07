@@ -30,7 +30,7 @@ namespace Xonix.Entities.Players
         private GridNodeSource _corruptedNodeSource;
         private GridNodeSource _nonCorruptedNodeSource;
 
- 
+
 
         public Corrupter() { }
 
@@ -53,15 +53,14 @@ namespace Xonix.Entities.Players
         /// <param name="seedNodePosition">Corruption start node</param>
         /// <param name="checkedPositions">Set of already checked postions for optimization</param>
         /// <returns>Count of corrupted nodes</returns>
-        public IEnumerable<GridNode> CorruptZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
+        public IEnumerable<GridNode> GetCorruptedZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
         {
             var uncheckedNodes = new Stack<GridNode>();
-            var corruptedNodes = new HashSet<GridNode>();
+            var zoneNodes = new HashSet<GridNode>();
 
             var seedNode = GetNode(seedNodePosition);
             uncheckedNodes.Push(seedNode);
 
-            Action onZoneFreeOfEnemies = null;
             int corruptedNodeCount = 0;
 
             while (uncheckedNodes.Count != 0)
@@ -76,8 +75,7 @@ namespace Xonix.Entities.Players
 
                 if (currentPickedNode.State == _nonCorruptedNodeSource.State)
                 {
-                    onZoneFreeOfEnemies += () => CorruptNode(currentPickedNode);
-                    corruptedNodes.Add(currentPickedNode);
+                    zoneNodes.Add(currentPickedNode);
                     corruptedNodeCount++;
                 }
 
@@ -85,13 +83,16 @@ namespace Xonix.Entities.Players
                     uncheckedNodes.Push(GetNode(currentPickedNode.Position + neighbourTemplate));
             }
 
+            // If zone contains at least one enemy - zone won't be corrupted
             if (IsZoneFreeOfEnemies(checkedPositions))
             {
-                onZoneFreeOfEnemies?.Invoke();
-                return corruptedNodes;
+                foreach (var node in zoneNodes)
+                    CorruptNode(node);
             }
+            else
+                zoneNodes.Clear();
 
-            return new HashSet<GridNode>();
+            return zoneNodes;
         }
 
         /// <summary>
@@ -137,10 +138,10 @@ namespace Xonix.Entities.Players
                 yield return enemy.Position;
         }
 
-        private GridNode GetNode(Vector2 vector2)
+        private GridNode GetNode(Vector2 nodePosition)
         {
-            if (!XonixGame.TryToGetNodeWithPosition(vector2, out GridNode node))
-                throw new UnityException($"Node with position {vector2} doesn't exist");
+            if (!XonixGame.TryToGetNodeWithPosition(nodePosition, out GridNode node))
+                throw new UnityException($"Node with position {nodePosition} doesn't exist");
 
             return node;
         }
