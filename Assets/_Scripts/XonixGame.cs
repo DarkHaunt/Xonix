@@ -4,7 +4,6 @@ using System.Collections;
 using System;
 using Xonix.Entities.Enemies;
 using Xonix.Entities.Players;
-using Xonix.PlayerInput;
 using Xonix.Entities;
 using Xonix.Grid;
 using Xonix.UI;
@@ -27,9 +26,7 @@ namespace Xonix
         private const float TargetSeaFieldCorruptionPercent = 0.50f; // A percent of corrupted sea field, when level will be completed
 
         private const int IndexOfFirstSeaEnemy = 1; // For the enemy collection
-        private const int StartCountOfSeaEnemies = 1;
-
-        private const int CameraLeftSidePixelsPadding = 60;
+        private const int StartCountOfSeaEnemies = 3;
 
         // Cached for optimization
         private readonly YieldInstruction MoveTimeYield = new WaitForSeconds(EntitiesMoveTimeDelaySeconds);
@@ -42,8 +39,7 @@ namespace Xonix
         public static event Action OnLevelReloaded;
 
         [SerializeField] private XonixGrid _grid;
-        [SerializeField] private FourDirectionInputTranslator _inputSystem;
-        [SerializeField] private GamePrintUI _printUI;
+        [SerializeField] private PrintUIElements _printUI;
         [SerializeField] private Camera _mainCamera;
 
         private EntitySpawner _entitySpawner;
@@ -78,6 +74,9 @@ namespace Xonix
 
             _entitySpawner = new EntitySpawner(_grid);
 
+            _mainCamera.transform.position = _grid.GetGridCenter();
+            _mainCamera.transform.position += new Vector3(0f,0f,-10f);
+
             await _entitySpawner.Init();
 
             OnLevelLosen += ReloadLevel;
@@ -88,8 +87,6 @@ namespace Xonix
             _printUI.SetTimeSeconds(_minutesForLevelLeft);
             _printUI.SetLevelNumber(_levelNumber);
             _printUI.SetLifesNumber(_player.Lifes);
-
-            InitCamera();
 
             StartCoroutine(LevelTimerCoroutine());
             StartCoroutine(EntitiesMoveCoroutine());
@@ -102,7 +99,7 @@ namespace Xonix
             _enemies = new List<Enemy>(StartCountOfSeaEnemies + 1); // Sea enemies + one earth enemy;
 
 
-            var playerSpawnTask = _entitySpawner.SpawnPlayer(_inputSystem);
+            var playerSpawnTask = _entitySpawner.SpawnPlayer();
             await playerSpawnTask;
 
 
@@ -137,18 +134,6 @@ namespace Xonix
 
             for (int i = 0; i < StartCountOfSeaEnemies; i++)
                 SpawnSeaEnemy();
-        }
-
-        private void InitCamera()
-        {
-            _mainCamera.transform.position = _grid.GetGridCenter();
-
-            var leftXPosition = _mainCamera.ScreenToWorldPoint(new Vector2(CameraLeftSidePixelsPadding, 0f)).x;
-            var leftSideGridPosition = _grid.GetGridLeftCenterPosition();
-
-            var deltaX = leftSideGridPosition.x - leftXPosition;
-
-            _mainCamera.transform.position += new Vector3(deltaX, 0f, -10f);
         }
 
         private void EndGame()

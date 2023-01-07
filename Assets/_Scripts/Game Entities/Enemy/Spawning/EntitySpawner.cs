@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System;
 using Xonix.Entities.Players;
 using Xonix.Entities.Enemies;
-using Xonix.PlayerInput;
 using Xonix.Grid;
 
 
@@ -56,12 +55,13 @@ namespace Xonix.Entities
             return enemy;
         }
 
-        public async Task<Player> SpawnPlayer(FourDirectionInputTranslator inputSystem)
+        public async Task<Player> SpawnPlayer()
         {
             var playerPosition = _grid.GetFieldTopCenterPosition();
 
             var player = new GameObject($"Player").AddComponent<Player>();
-            await player.Init(inputSystem, playerPosition, _playerSprite);
+
+            await player.InitAsync(playerPosition, _playerSprite);
 
             return player;
         }

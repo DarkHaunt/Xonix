@@ -6,7 +6,7 @@ SpriteAtlas:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Square Sprites
+  m_Name: Game Sprites
   m_EditorData:
     serializedVersion: 2
     textureSettings:
@@ -80,5 +80,5 @@ SpriteAtlas:
   - EarthNodeSprite
   - SeaEnemeySprite
   m_RenderDataMap: {}
-  m_Tag: Square Sprites
+  m_Tag: Game Sprites
   m_IsVariant: 0

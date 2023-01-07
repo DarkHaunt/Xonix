@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using UnityEngine;
-using Xonix.PlayerInput;
 using Xonix.Grid;
+using Lean.Touch;
 
 
 
@@ -31,11 +31,10 @@ namespace Xonix.Entities.Players
 
 
 
-        public async Task Init(FourDirectionInputTranslator inputTranslator, Vector2 initPosition, Sprite sprite)
+        public async Task InitAsync(Vector2 initPosition, Sprite sprite)
         {
-            InitMovingSystem(inputTranslator);
             base.Init(initPosition, sprite);
-            
+
             _trailMarker = new TrailMarker();
             _corrupter = new Corrupter();
 
@@ -139,21 +138,6 @@ namespace Xonix.Entities.Players
             _trailMarker.ClearTrail();
         }
 
-        private void InitMovingSystem(FourDirectionInputTranslator inputTranslator)
-        {
-            // Set direction relevant to holded button
-            inputTranslator.UpArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.up);
-            inputTranslator.DownArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.down);
-            inputTranslator.LeftArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.left);
-            inputTranslator.RightArrowButton.OnHoldStart += () => SetMoveDirection(Vector2.right);
-
-            // On unhold stop movement
-            inputTranslator.UpArrowButton.OnHoldEnd += StopMoving;
-            inputTranslator.DownArrowButton.OnHoldEnd += StopMoving;
-            inputTranslator.LeftArrowButton.OnHoldEnd += StopMoving;
-            inputTranslator.RightArrowButton.OnHoldEnd += StopMoving;
-        }
-
         private void DecreaseLifeCount()
         {
             _lifesCount--;
@@ -162,41 +146,39 @@ namespace Xonix.Entities.Players
                 OnLivesEnd?.Invoke();
         }
 
-
-
-        #region [TEST INPUT SYSTEM]
-
-        private void Update()
+        private void GetSwipedMoveDirection(LeanFinger finger)
         {
-            if (Input.GetKey(KeyCode.W))
+            var direction = (finger.LastScreenPosition - finger.StartScreenPosition).normalized;
+
+
+            if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
             {
-                SetMoveDirection(Vector2.up);
-                return;
+                direction.y = 0;
+                direction.x = Mathf.Round(direction.x);
+            }
+            else
+            {
+                direction.x = 0;
+                direction.y = Mathf.Round(direction.y);
             }
 
-            if (Input.GetKey(KeyCode.S))
-            {
-                SetMoveDirection(Vector2.down);
-                return;
-            }
-
-            if (Input.GetKey(KeyCode.A))
-            {
-                SetMoveDirection(Vector2.left);
-                return;
-            }
-
-            if (Input.GetKey(KeyCode.D))
-            {
-                SetMoveDirection(Vector2.right);
-                return;
-            }
-
-
-            SetMoveDirection(Vector2.zero);
-
+            SetMoveDirection(direction);
         }
 
-        #endregion
+        private void PlayerStopMoving(LeanFinger finger) => StopMoving();
+
+
+
+        private void OnEnable()
+        {
+            LeanTouch.OnFingerSwipe += GetSwipedMoveDirection;
+            LeanTouch.OnFingerTap += PlayerStopMoving;
+        }
+
+        private void OnDisable()
+        {
+            LeanTouch.OnFingerSwipe -= GetSwipedMoveDirection;
+            LeanTouch.OnFingerTap -= PlayerStopMoving;
+        }
     }
 }

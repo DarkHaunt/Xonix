@@ -5,8 +5,9 @@ using TMPro;
 
 namespace Xonix.UI
 {
-    public class GamePrintUI : MonoBehaviour
+    public class PrintUIElements : MonoBehaviour
     {
+        [Header("--- Text Fields ---")]
         [SerializeField] private TextMeshProUGUI _scoreNumber;
         [SerializeField] private TextMeshProUGUI _levelNumber;
         [SerializeField] private TextMeshProUGUI _lifesNumber;

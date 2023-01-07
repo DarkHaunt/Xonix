@@ -14,7 +14,7 @@ namespace Xonix.Grid
 
         public const float CellSize = 1f;
 
-        private const int LineCellsCount = 90;
+        private const int LineCellsCount = 100;
         private const int ColumnCellsCount = 60;
         private const int InitEarthBorderWigthNodesCount = 4;
         private const int FullFieldSize = LineCellsCount * ColumnCellsCount;
