@@ -27,7 +27,7 @@ namespace Xonix
         private const float TargetSeaFieldCorruptionPercent = 0.50f; // A percent of corrupted sea field, when level will be completed
 
         private const int IndexOfFirstSeaEnemy = 1; // For the enemy collection
-        private const int StartCountOfSeaEnemies = 3;
+        private const int StartCountOfSeaEnemies = 1;
 
         private const int CameraLeftSidePixelsPadding = 60;
 
@@ -186,7 +186,7 @@ namespace Xonix
             var seaEnemy = _entitySpawner.SpawnEnemy(EnemyType.SeaEnemy);
             _enemies.Add(seaEnemy);
 
-            OnLevelReloaded += () => seaEnemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
+            OnLevelCompleted += () => seaEnemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
             seaEnemy.OnTrailNodeStepped += LoseLevel;
         }
 
