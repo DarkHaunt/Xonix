@@ -40,6 +40,7 @@ namespace Xonix
 
         [SerializeField] private XonixGrid _grid;
         [SerializeField] private PrintUIElements _printUI;
+        [SerializeField] private Animator _loseBlickScreenAnimator;
         [SerializeField] private Camera _mainCamera;
 
         private EntitySpawner _entitySpawner;
