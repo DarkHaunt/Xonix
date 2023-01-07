@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using UnityEngine.AddressableAssets;
 using UnityEngine;
-using Xonix.Grid;
 using Lean.Touch;
+using Xonix.Audio;
+using Xonix.Grid;
 
 
 
@@ -13,6 +15,7 @@ namespace Xonix.Entities.Players
 
     public class Player : Entity
     {
+        private const string DeathSoundPath = "Audio/Player/DeathSound";
         private const int StartLifesCount = 3;
 
 
@@ -21,6 +24,8 @@ namespace Xonix.Entities.Players
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
+
+        private AudioClip _deathClip;
 
         private int _lifesCount = StartLifesCount;
         private bool _isTrailing = false;
@@ -38,7 +43,11 @@ namespace Xonix.Entities.Players
             _trailMarker = new TrailMarker();
             _corrupter = new Corrupter();
 
-            await Task.WhenAll(_trailMarker.InitTrailSource(), _corrupter.InitNodeSourcesForCorruptionAsync());
+            var deathSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(DeathSoundPath).Task;
+
+            await Task.WhenAll(_trailMarker.InitTrailSource(), _corrupter.InitNodeSourcesForCorruptionAsync(), deathSoundLoadingTask);
+
+            _deathClip = deathSoundLoadingTask.Result;
 
             XonixGame.OnLevelLosen += DecreaseLifeCount;
             XonixGame.OnLevelReloaded += () =>
@@ -49,6 +58,8 @@ namespace Xonix.Entities.Players
                 _corrupter.DecorruptNodes(_trailMarker.TrailNodesDirections.Keys);
                 _trailMarker.ClearTrail();
             };
+
+            XonixGame.OnGameOver += OnDisable;
         }
 
         public override void Move(GridNode node)
@@ -143,7 +154,12 @@ namespace Xonix.Entities.Players
             _lifesCount--;
 
             if (_lifesCount == 0)
+            {
                 OnLivesEnd?.Invoke();
+                return;
+            }
+
+            SoundManager.PlayClip(_deathClip);
         }
 
         private void GetSwipedMoveDirection(LeanFinger finger)

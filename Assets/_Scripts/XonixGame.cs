@@ -5,8 +5,10 @@ using System;
 using Xonix.Entities.Enemies;
 using Xonix.Entities.Players;
 using Xonix.Entities;
+using Xonix.Audio;
 using Xonix.Grid;
 using Xonix.UI;
+using UnityEngine.AddressableAssets;
 using UnityEngine;
 
 
@@ -21,7 +23,11 @@ namespace Xonix
 
         #region [Constant Data]
 
-        private const float GameEndTime = 90; // One and a half hour of max game time
+        private const string GameOverSoundPath = "Audio/Game/GameOverSound";
+        private const string LevelUpSoundPath = "Audio/Game/LevelPassSound";
+
+        private const float GameEndTimeMinutes = 90; // One and a half hour of max game time
+        private const float GameOverDelaySeconds = 3f;
         private const float EntitiesMoveTimeDelaySeconds = 0.03f;
         private const float TargetSeaFieldCorruptionPercent = 0.50f; // A percent of corrupted sea field, when level will be completed
 
@@ -37,10 +43,10 @@ namespace Xonix
         public static event Action OnLevelCompleted;
         public static event Action OnLevelLosen;
         public static event Action OnLevelReloaded;
+        public static event Action OnGameOver;
 
         [SerializeField] private XonixGrid _grid;
         [SerializeField] private PrintUIElements _printUI;
-        [SerializeField] private Animator _loseBlickScreenAnimator;
         [SerializeField] private Camera _mainCamera;
 
         private EntitySpawner _entitySpawner;
@@ -49,7 +55,7 @@ namespace Xonix
 
         private int _score = 0;
         private int _levelNumber = 1;
-        private float _minutesForLevelLeft = GameEndTime;
+        private float _minutesForLevelLeft = GameEndTimeMinutes;
 
 
 
@@ -78,10 +84,16 @@ namespace Xonix
             _mainCamera.transform.position = _grid.GetGridCenter();
             _mainCamera.transform.position += new Vector3(0f,0f,-10f);
 
+            var gameOverSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(GameOverSoundPath).Task;
+            var levelUpSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(LevelUpSoundPath).Task;
+
             await _entitySpawner.Init();
 
             OnLevelLosen += ReloadLevel;
             OnLevelCompleted += ReloadLevel;
+
+            OnLevelCompleted += () => SoundManager.PlayClip(levelUpSoundLoadingTask.Result);
+            OnGameOver += () => SoundManager.PlayClip(gameOverSoundLoadingTask.Result);
 
             await InitSpawn();
 
@@ -103,19 +115,18 @@ namespace Xonix
             var playerSpawnTask = _entitySpawner.SpawnPlayer();
             await playerSpawnTask;
 
-
             _player = playerSpawnTask.Result;
 
-            _player.OnTrailNodeStepped += LoseLevel;
-
+            OnGameOver += _player.StopMoving;
+            OnLevelLosen += () => _printUI.SetLifesNumber(_player.Lifes);
             OnLevelReloaded += () =>
             {
                 _player.StopMoving();
                 _player.transform.position = _grid.GetFieldTopCenterPosition();
             };
 
-            OnLevelLosen += () => _printUI.SetLifesNumber(_player.Lifes);
-
+            _player.OnTrailNodeStepped += LoseLevel;
+            _player.OnLivesEnd += EndGame;
             _player.OnNodesCorrupted += (corruptedNodes) =>
             {
                 _grid.RemoveSeaNodes(corruptedNodes);
@@ -123,14 +134,14 @@ namespace Xonix
                 _printUI.SetScoreNumber(_score);
             };
 
-            _player.OnLivesEnd += EndGame;
-
             #endregion
 
             var earthEnemy = _entitySpawner.SpawnEnemy(EnemyType.EarthEnemy);
             earthEnemy.OnTrailNodeStepped += LoseLevel;
+
             _enemies.Add(earthEnemy);
 
+            OnGameOver += earthEnemy.StopMoving;
             OnLevelReloaded += () => earthEnemy.transform.position = _grid.GetFieldBottomCenterPosition();
 
             for (int i = 0; i < StartCountOfSeaEnemies; i++)
@@ -139,13 +150,9 @@ namespace Xonix
 
         private void EndGame()
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            OnGameOver?.Invoke();
 
-#if UNITY_ANDROID_API
-            Application.Quit();
-#endif
+            StartCoroutine(GameOverCoroutine());
         }
 
         private void PassLevel()
@@ -173,6 +180,8 @@ namespace Xonix
             _enemies.Add(seaEnemy);
 
             OnLevelCompleted += () => seaEnemy.transform.position = _grid.GetRandomSeaFieldNodePosition();
+            OnGameOver += seaEnemy.StopMoving;
+
             seaEnemy.OnTrailNodeStepped += LoseLevel;
         }
 
@@ -228,6 +237,19 @@ namespace Xonix
             }
 
             EndGame();
+        }
+
+        private IEnumerator GameOverCoroutine()
+        {
+            yield return new WaitForSeconds(GameOverDelaySeconds);
+
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+
+#if UNITY_ANDROID_API
+            Application.Quit();
+#endif
         }
 
 
