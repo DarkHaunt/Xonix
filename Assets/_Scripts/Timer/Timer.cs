@@ -82,6 +82,8 @@ namespace Xonix
 
         private void CancelTickCounting()
         {
+            UnityEngine.MonoBehaviour.print("Cancel");
+
             if (!_timerCountingCancellationTokenSource.IsCancellationRequested)
                 _timerCountingCancellationTokenSource.Cancel();
         }

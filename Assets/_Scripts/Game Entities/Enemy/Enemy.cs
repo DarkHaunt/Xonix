@@ -16,7 +16,7 @@ namespace Xonix.Entities
 
 
 
-        public override void Move(GridNode node)
+        public override void MoveIntoNode(GridNode node)
         {
             if (_bounceBehaviour.IsNodeHasBorderState(node))
                 SetMoveDirection(_bounceBehaviour.GetBounceDirection(Position, MoveDirection));
@@ -24,24 +24,24 @@ namespace Xonix.Entities
             transform.Translate(MoveTranslation);
 
             if (node.State == NodeState.Trail)
-                StepOnTrailNode();
+                NotifyThatSteppedOnTrail();
         }
 
-        public override void OnOutOfField() => SetMoveDirection(_bounceBehaviour.GetBounceDirection(Position, MoveDirection));
+        protected override void OnOutField() => SetMoveDirection(_bounceBehaviour.GetBounceDirection(Position, MoveDirection));
 
-        public void Init(EnemyType type, Vector2 initPosition, Sprite sprite)
+        public void Init(EnemyType type, Vector2 initPosition, Sprite sprite, XonixGrid grid)
         {
-            _bounceBehaviour = new EnemyBounceBehaviour(type);
+            _bounceBehaviour = new EnemyBounceBehaviour(type, grid);
 
-            Init(initPosition, sprite);
+            Init(initPosition, sprite, grid);
         }
 
-        public override void Init(Vector2 initPosition, Sprite sprite)
+        public override void Init(Vector2 initPosition, Sprite sprite, XonixGrid grid)
         {
             var randomMoveDirection = new Vector2(GetRandomSign(), GetRandomSign());
             SetMoveDirection(randomMoveDirection);
 
-            base.Init(initPosition, sprite);
+            base.Init(initPosition, sprite, grid);
         }
     }
 }

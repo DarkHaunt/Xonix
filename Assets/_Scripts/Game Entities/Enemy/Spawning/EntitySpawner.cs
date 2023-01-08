@@ -50,7 +50,7 @@ namespace Xonix.Entities
             var enemySprite = SpritesOfEnemyWithType[type];
 
             var enemy = new GameObject($"{type}").AddComponent<Enemy>();
-            enemy.Init(type, enemyPosition, enemySprite);
+            enemy.Init(type, enemyPosition, enemySprite, _grid);
 
             LevelHandler.OnLevelCompleted += () => enemy.transform.position = GetPositionOfEnemyWithType[type].Invoke();
 
@@ -63,9 +63,10 @@ namespace Xonix.Entities
 
             var player = new GameObject($"Player").AddComponent<Player>();
 
-            await player.InitAsync(playerInitPosition, _playerSprite);
+            await player.InitAsync(playerInitPosition, _playerSprite, _grid);
 
             LevelHandler.OnLevelLosen += () => player.transform.position = playerInitPosition;
+            LevelHandler.OnLevelCompleted += () => player.transform.position = playerInitPosition;
 
             return player;
         }

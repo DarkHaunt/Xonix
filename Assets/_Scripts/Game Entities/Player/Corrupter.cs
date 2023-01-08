@@ -26,12 +26,17 @@ namespace Xonix.Entities.PlayerComponents
             new Vector2(-CellSize, 0f)
         };
 
+        private readonly XonixGrid _grid;
+
         private GridNodeSource _corruptedNodeSource;
         private GridNodeSource _nonCorruptedNodeSource;
 
 
 
-        public Corrupter() { }
+        public Corrupter(XonixGrid grid)
+        {
+            _grid = grid;
+        }
 
 
 
@@ -139,7 +144,7 @@ namespace Xonix.Entities.PlayerComponents
 
         private GridNode GetNode(Vector2 nodePosition)
         {
-            if (!XonixGame.TryToGetNodeWithPosition(nodePosition, out GridNode node))
+            if (!_grid.TryToGetNodeWithPosition(nodePosition, out GridNode node))
                 throw new UnityException($"Node with position {nodePosition} doesn't exist");
 
             return node;

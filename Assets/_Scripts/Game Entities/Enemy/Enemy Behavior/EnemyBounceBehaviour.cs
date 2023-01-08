@@ -23,12 +23,14 @@ namespace Xonix.Entities.EnemyComponents
         };
 
         private readonly EnemyType _enemyType;
+        private readonly XonixGrid _grid;
 
 
 
-        public EnemyBounceBehaviour(EnemyType enemyType)
+        public EnemyBounceBehaviour(EnemyType enemyType, XonixGrid grid)
         {
             _enemyType = enemyType;
+            _grid = grid;
         }
 
 
@@ -61,7 +63,7 @@ namespace Xonix.Entities.EnemyComponents
 
         private bool IsBorderInPosition(Vector2 position)
         {
-            var isNodeOutOfGameField = !XonixGame.TryToGetNodeWithPosition(position, out GridNode node);
+            var isNodeOutOfGameField = !_grid.TryToGetNodeWithPosition(position, out GridNode node);
 
             if (!isNodeOutOfGameField)
                 return IsNodeHasBorderState(node);

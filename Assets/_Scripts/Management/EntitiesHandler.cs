@@ -15,7 +15,7 @@ namespace Xonix.Entities
     public class EntitiesHandler : MonoBehaviour
     {
         private const int IndexOfFirstSeaEnemy = 1; // For the enemy collection
-        private const int StartCountOfSeaEnemies = 3;
+        private const int StartCountOfSeaEnemies = 1;
         private const float EntitiesMoveTimeDelaySeconds = 0.03f;
 
         public event Action OnEnemyTouchPlayer;
@@ -24,6 +24,8 @@ namespace Xonix.Entities
         private EntitySpawner _entitySpawner;
         private List<Enemy> _enemies;
         private Player _player;
+
+        private LevelHandler _levelHandler;
 
         private Timer _entitiesMovingDelayTimer;
 
@@ -40,12 +42,11 @@ namespace Xonix.Entities
             }
         }
 
-        public Enemy EarthEnemy => _enemies[IndexOfFirstSeaEnemy - 1];
 
 
-
-        public async Task InitAsync(XonixGrid grid)
+        public async Task InitAsync(XonixGrid grid, LevelHandler levelHandler)
         {
+            _levelHandler = levelHandler;
             _entitySpawner = new EntitySpawner(grid);
 
             await _entitySpawner.InitAsync();
@@ -62,9 +63,10 @@ namespace Xonix.Entities
 
 
             LevelHandler.OnLevelCompleted += () => SpawnEnemy(EnemyType.SeaEnemy);
+            OnEnemyTouchPlayer += _levelHandler.LoseLevel;
+
 
             _entitiesMovingDelayTimer.OnTickPassed += MoveAllEntities;
-
 #pragma warning disable CS4014 // “ак как этот вызов не ожидаетс€, выполнение существующего метода продолжаетс€ до тех пор, пока вызов не будет завершен
             _entitiesMovingDelayTimer.Start();
 #pragma warning restore CS4014 // “ак как этот вызов не ожидаетс€, выполнение существующего метода продолжаетс€ до тех пор, пока вызов не будет завершен
@@ -76,9 +78,11 @@ namespace Xonix.Entities
             await playerSpawnTask;
 
             _player = playerSpawnTask.Result;
+            _player.OnTrailNodeStepped += _levelHandler.LoseLevel;
 
             XonixGame.OnGameOver += _player.StopMoving;
             LevelHandler.OnLevelLosen += _player.StopMoving;
+            LevelHandler.OnLevelCompleted += _player.StopMoving;
         }
 
         private Enemy SpawnEnemy(EnemyType type)
@@ -87,32 +91,22 @@ namespace Xonix.Entities
             _enemies.Add(enemy);
 
             XonixGame.OnGameOver += enemy.StopMoving;
+            enemy.OnTrailNodeStepped += _levelHandler.LoseLevel;
 
             return enemy;
         }
 
         private void MoveAllEntities()
         {
-            MoveEntity(_player);
+            _player.Move();
 
             foreach (var entity in _enemies)
             {
-                MoveEntity(entity);
+                entity.Move();
 
                 if (entity.Position == _player.Position)
                     OnEnemyTouchPlayer?.Invoke();
             }
-        }
-
-        private void MoveEntity(Entity entity)
-        {
-            if (!XonixGame.TryToGetNodeWithPosition(entity.NextPosition, out GridNode node))
-            {
-                entity.OnOutOfField();
-                return;
-            }
-
-            entity.Move(node);
         }
     }
 }

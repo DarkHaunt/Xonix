@@ -135,16 +135,8 @@ namespace Xonix.Grid
 
         public Vector2 GetRandomSeaFieldNodePosition()
         {
-            /*            var nodes = new GridNode[_seaNodes.Count];
-                        _seaNodes.CopyTo(nodes);
-
-                        var randomIndex = Randomizer.Next(nodes.Length);
-                        return nodes[randomIndex].Position;*/
-
-
-            var randomX = CellSize * Randomizer.Next(0, LineCellsCount - 1);
-            var randomY = CellSize * Randomizer.Next(0, ColumnCellsCount - 1);
-
+            var randomX = CellSize * Randomizer.Next(InitEarthBorderWigthNodesCount, LineCellsCount - InitEarthBorderWigthNodesCount - 1);
+            var randomY = CellSize * Randomizer.Next(InitEarthBorderWigthNodesCount, ColumnCellsCount - InitEarthBorderWigthNodesCount -1);
 
             return FirstNodePosition + new Vector2(randomX, randomY);
         }

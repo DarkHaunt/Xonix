@@ -21,8 +21,8 @@ namespace Xonix
         private const string GameOverSoundPath = "Audio/Game/GameOverSound";
         private const float GameOverDelaySeconds = 2f;
 
-
         public static event Action OnGameOver;
+
 
         [Header("--- Visual Elements ---")]
         [SerializeField] private PrintUIElements _printUI;
@@ -41,29 +41,20 @@ namespace Xonix
 
 
 
-        public static bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
-        {
-            return _instance._grid.TryToGetNodeWithPosition(position, out node);
-        }
-
         private async void Init()
         {
             // Camera alignment
             _mainCamera.transform.position = _grid.GetGridCenter();
             _mainCamera.transform.position += new Vector3(0f, 0f, -10f);
 
-            await Task.WhenAll(_levelHandler.InitAsync(), _entitiesHandler.InitAsync(_grid));
+            await _levelHandler.InitAsync();
+
+            await _entitiesHandler.InitAsync(_grid, _levelHandler);
 
             _enemies = _entitiesHandler.SeaEnemies;
 
             #region [Entities Init]
 
-            _entitiesHandler.EarthEnemy.OnTrailNodeStepped += _levelHandler.LoseLevel;
-
-            foreach (var enemy in _entitiesHandler.SeaEnemies)
-                enemy.OnTrailNodeStepped += _levelHandler.LoseLevel;
-
-            _entitiesHandler.Player.OnTrailNodeStepped += _levelHandler.LoseLevel;
             _entitiesHandler.Player.OnLivesEnd += EndGame;
             _entitiesHandler.Player.OnNodesCorrupted += (corruptedNodes) =>
             {

@@ -38,12 +38,12 @@ namespace Xonix.Entities
 
 
 
-        public async Task InitAsync(Vector2 initPosition, Sprite sprite)
+        public async Task InitAsync(Vector2 initPosition, Sprite sprite, XonixGrid grid)
         {
-            base.Init(initPosition, sprite);
+            base.Init(initPosition, sprite, grid);
 
             _trailMarker = new TrailMarker();
-            _corrupter = new Corrupter();
+            _corrupter = new Corrupter(grid);
 
             var deathSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(DeathSoundPath).Task;
 
@@ -64,7 +64,7 @@ namespace Xonix.Entities
             XonixGame.OnGameOver += OnDisable;
         }
 
-        public override void Move(GridNode node)
+        public override void MoveIntoNode(GridNode node)
         {
             // For optimization
             if (MoveDirection == Vector2.zero)
@@ -79,8 +79,8 @@ namespace Xonix.Entities
                     OnEarthNodeStep();
                     break;
                 case NodeState.Trail:
-                    OnTrailNodeStep();
-                    return; // Shouldn't walk if losed
+                    NotifyThatSteppedOnTrail();
+                    return; // Don't move if steped
                 default:
                     break;
             }
@@ -88,7 +88,10 @@ namespace Xonix.Entities
             transform.Translate(MoveTranslation);
         }
 
-        public override void OnOutOfField() => StopMoving();
+        protected override void OnOutField()
+        {
+            StopMoving();
+        }
 
         private void OnSeaNodeStep(GridNode seaNode)
         {
@@ -103,11 +106,6 @@ namespace Xonix.Entities
 
             _isTrailing = false;
             CorruptZonesAttachedToTrail();
-        }
-
-        private void OnTrailNodeStep()
-        {
-            StepOnTrailNode();
         }
 
         /// <summary>
