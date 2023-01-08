@@ -5,6 +5,9 @@ using TMPro;
 
 namespace Xonix.UI
 {
+    /// <summary>
+    /// All printed UI elements in the game
+    /// </summary>
     public class PrintUIElements : MonoBehaviour
     {
         [Header("--- Text Fields ---")]
@@ -17,7 +20,7 @@ namespace Xonix.UI
 
 
         public void SetScoreNumber(int score) => _scoreNumber.text = $"{score}";
-        public void SetLifesNumber(int lifesNumber) => _lifesNumber.text = $"{lifesNumber}";
+        public void SetLivesNumber(int lifesNumber) => _lifesNumber.text = $"{lifesNumber}";
         public void SetLevelNumber(int levelNumber) => _levelNumber.text = $"{levelNumber}";
         public void SetTimeSeconds(float seconds) => _timeLeftSeconds.text = $"{(int)seconds}";
         public void SetFillPercent(float percent) => _fillPercent.text = $"{(int)(percent * 100)}%";

@@ -4,12 +4,14 @@ using System;
 using UnityEngine.AddressableAssets;
 using UnityEngine;
 using Lean.Touch;
+using Xonix.Entities.PlayerComponents;
+using Xonix.LevelHandling;
 using Xonix.Audio;
 using Xonix.Grid;
 
 
 
-namespace Xonix.Entities.Players
+namespace Xonix.Entities
 {
     using static GridNodeSource;
 
@@ -32,7 +34,7 @@ namespace Xonix.Entities.Players
 
 
 
-        public int Lifes => _lifesCount;
+        public int Lives => _lifesCount;
 
 
 
@@ -49,8 +51,8 @@ namespace Xonix.Entities.Players
 
             _deathClip = deathSoundLoadingTask.Result;
 
-            XonixGame.OnLevelLosen += DecreaseLifeCount;
-            XonixGame.OnLevelReloaded += () =>
+            LevelHandler.OnLevelLosen += DecreaseLifesCount;
+            LevelHandler.OnLevelLosen += () =>
             {
                 _isTrailing = false;
 
@@ -105,8 +107,6 @@ namespace Xonix.Entities.Players
 
         private void OnTrailNodeStep()
         {
-            print("Player loses because stepped on his trail");
-
             StepOnTrailNode();
         }
 
@@ -149,7 +149,7 @@ namespace Xonix.Entities.Players
             _trailMarker.ClearTrail();
         }
 
-        private void DecreaseLifeCount()
+        private void DecreaseLifesCount()
         {
             _lifesCount--;
 
@@ -165,7 +165,6 @@ namespace Xonix.Entities.Players
         private void GetSwipedMoveDirection(LeanFinger finger)
         {
             var direction = (finger.LastScreenPosition - finger.StartScreenPosition).normalized;
-
 
             if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
             {

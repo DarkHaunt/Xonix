@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Default Local Group
+  m_Name: Sprites
   m_EditorClassIdentifier: 
-  m_GroupName: Default Local Group
+  m_GroupName: Sprites
   m_Data:
     m_SerializedData: []
-  m_GUID: 328a311d03777ed42949e33528e05d52
+  m_GUID: 0acd2f71a685c4d4396423c977c69493
   m_SerializeEntries:
-  - m_GUID: 099f61c50253d904fbf4aa08349a81a3
-    m_Address: Grid/NodeSource/EarthNodeSource
+  - m_GUID: bf5350463fb67754caa595a65a3524e8
+    m_Address: Sprites/Entities/Enemies/EarthEnemy
     m_ReadOnly: 0
     m_SerializedLabels: []
-  - m_GUID: fd62fe3a88a7a984a84ce397931c9190
-    m_Address: Grid/NodeSource/TrailNodeSource
+  - m_GUID: 8df0616f03a9c8d4488bc5f27e73d6f5
+    m_Address: Sprites/Entities/Enemies/SeaEnemy
     m_ReadOnly: 0
     m_SerializedLabels: []
-  - m_GUID: 0563a4367ba4a3249b94989b9f36450e
-    m_Address: Grid/NodeSource/SeaNodeSource
+  - m_GUID: f152bb0a931d29b41b03c9815e13c4d8
+    m_Address: Sprites/Entities/Player
     m_ReadOnly: 0
     m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c38081ef7bca42041b3d1f3ea4052918, type: 2}
   m_SchemaSet:
     m_Schemas:
-    - {fileID: 11400000, guid: 6f779fbc7c1baf0499f01ebb57098f37, type: 2}
-    - {fileID: 11400000, guid: 92f1e2e9c6e039d408d4a079f0681434, type: 2}
+    - {fileID: 11400000, guid: bdb96864c3fb2d04a8d6282795a3871e, type: 2}
+    - {fileID: 11400000, guid: 9bc801ef29604fb4b878f6238075d27b, type: 2}

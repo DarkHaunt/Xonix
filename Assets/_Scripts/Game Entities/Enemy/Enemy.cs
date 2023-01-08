@@ -1,4 +1,4 @@
-using Xonix.Entities.Enemies;
+using Xonix.Entities.EnemyComponents;
 using UnityEngine;
 using Xonix.Grid;
 
@@ -7,19 +7,19 @@ using Xonix.Grid;
 namespace Xonix.Entities
 {
     using static StaticRandomizer;
-    using static EnemyBehaviour;
+    using static EnemyBounceBehaviour;
     using static GridNodeSource;
 
     public class Enemy : Entity
     {
-        private EnemyBehaviour _enemyBehaviour;
+        private EnemyBounceBehaviour _bounceBehaviour;
 
 
 
         public override void Move(GridNode node)
         {
-            if (_enemyBehaviour.IsNodeHasBorderState(node))
-                SetMoveDirection(_enemyBehaviour.GetBounceDirection(Position, MoveDirection));
+            if (_bounceBehaviour.IsNodeHasBorderState(node))
+                SetMoveDirection(_bounceBehaviour.GetBounceDirection(Position, MoveDirection));
 
             transform.Translate(MoveTranslation);
 
@@ -27,11 +27,11 @@ namespace Xonix.Entities
                 StepOnTrailNode();
         }
 
-        public override void OnOutOfField() => SetMoveDirection(_enemyBehaviour.GetBounceDirection(Position, MoveDirection));
+        public override void OnOutOfField() => SetMoveDirection(_bounceBehaviour.GetBounceDirection(Position, MoveDirection));
 
         public void Init(EnemyType type, Vector2 initPosition, Sprite sprite)
         {
-            _enemyBehaviour = new EnemyBehaviour(type);
+            _bounceBehaviour = new EnemyBounceBehaviour(type);
 
             Init(initPosition, sprite);
         }

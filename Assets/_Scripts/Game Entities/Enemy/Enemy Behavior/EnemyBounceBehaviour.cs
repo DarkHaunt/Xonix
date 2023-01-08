@@ -4,16 +4,19 @@ using UnityEngine;
 
 
 
-namespace Xonix.Entities.Enemies
+namespace Xonix.Entities.EnemyComponents
 {
     using static GridNodeSource;
 
-    public class EnemyBehaviour
+    /// <summary>
+    /// Controlls enemy bouncing from border
+    /// </summary>
+    public class EnemyBounceBehaviour
     {
         /// <summary>
         /// A node state, that this enemy type perceives as border, and bounce from it
         /// </summary>
-        private static readonly Dictionary<EnemyType, NodeState> EnemyTypeBorderNodeState = new Dictionary<EnemyType, NodeState>()
+        private static readonly Dictionary<EnemyType, NodeState> EnemyTypeBorderNodeState = new Dictionary<EnemyType, NodeState>(2)
         {
             [EnemyType.EarthEnemy] = NodeState.Sea,
             [EnemyType.SeaEnemy] = NodeState.Earth,
@@ -23,7 +26,7 @@ namespace Xonix.Entities.Enemies
 
 
 
-        public EnemyBehaviour(EnemyType enemyType)
+        public EnemyBounceBehaviour(EnemyType enemyType)
         {
             _enemyType = enemyType;
         }
@@ -54,6 +57,8 @@ namespace Xonix.Entities.Enemies
             return new Vector2(currentDirection.x, -currentDirection.y);
         }
 
+        public bool IsNodeHasBorderState(GridNode node) => EnemyTypeBorderNodeState[_enemyType] == node.State;
+
         private bool IsBorderInPosition(Vector2 position)
         {
             var isNodeOutOfGameField = !XonixGame.TryToGetNodeWithPosition(position, out GridNode node);
@@ -63,8 +68,6 @@ namespace Xonix.Entities.Enemies
 
             return isNodeOutOfGameField;
         }
-
-        public bool IsNodeHasBorderState(GridNode node) => EnemyTypeBorderNodeState[_enemyType] == node.State;
 
 
 

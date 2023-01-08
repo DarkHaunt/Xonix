@@ -6,7 +6,7 @@ using Xonix.Grid;
 
 
 
-namespace Xonix.Entities.Players
+namespace Xonix.Entities.PlayerComponents
 {
     using static XonixGrid;
 

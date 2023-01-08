@@ -3,15 +3,15 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
-using Xonix.Entities.Players;
-using Xonix.Entities.Enemies;
+using Xonix.Entities.EnemyComponents;
+using Xonix.LevelHandling;
 using Xonix.Grid;
 
 
 
 namespace Xonix.Entities
 {
-    using static EnemyBehaviour;
+    using static EnemyBounceBehaviour;
 
     /// <summary>
     /// A spawner for all types of entities in the game
@@ -52,21 +52,25 @@ namespace Xonix.Entities
             var enemy = new GameObject($"{type}").AddComponent<Enemy>();
             enemy.Init(type, enemyPosition, enemySprite);
 
+            LevelHandler.OnLevelCompleted += () => enemy.transform.position = GetPositionOfEnemyWithType[type].Invoke();
+
             return enemy;
         }
 
         public async Task<Player> SpawnPlayer()
         {
-            var playerPosition = _grid.GetFieldTopCenterPosition();
+            var playerInitPosition = _grid.GetFieldTopCenterPosition();
 
             var player = new GameObject($"Player").AddComponent<Player>();
 
-            await player.InitAsync(playerPosition, _playerSprite);
+            await player.InitAsync(playerInitPosition, _playerSprite);
+
+            LevelHandler.OnLevelLosen += () => player.transform.position = playerInitPosition;
 
             return player;
         }
 
-        public async Task Init()
+        public async Task InitAsync()
         {
             var seaEnemySpriteLoadingTask = Addressables.LoadAssetAsync<Sprite>(SeaEnemeySpritePath).Task;
             var earthEnemySpriteLoadingTask = Addressables.LoadAssetAsync<Sprite>(EarthEnemeySpritePath).Task;

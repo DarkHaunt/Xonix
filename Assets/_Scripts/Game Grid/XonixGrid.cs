@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using Xonix.LevelHandling;
 
 
 
@@ -87,7 +88,7 @@ namespace Xonix.Grid
 
             _initSeaNodesCount = _seaNodes.Count;
 
-            XonixGame.OnLevelCompleted += ResetSeaField;
+            LevelHandler.OnLevelCompleted += ResetSeaField;
         }
 
         private void ResetSeaField()
@@ -132,15 +133,20 @@ namespace Xonix.Grid
 
         public Vector2 GetGridCenter() => new Vector2(LineUnitSize / 2, ColumnUnitSize / 2) - new Vector2(CellSize / 2, CellSize / 2);
 
-        public Vector2 GetGridLeftCenterPosition() => new Vector2(FirstNodePosition.x - CellSize / 2, Mathf.Round(ColumnUnitSize - CellSize) / 2);
-
         public Vector2 GetRandomSeaFieldNodePosition()
         {
-            var nodes = new GridNode[_seaNodes.Count];
-            _seaNodes.CopyTo(nodes);
+            /*            var nodes = new GridNode[_seaNodes.Count];
+                        _seaNodes.CopyTo(nodes);
 
-            var randomIndex = Randomizer.Next(nodes.Length);
-            return nodes[randomIndex].Position;
+                        var randomIndex = Randomizer.Next(nodes.Length);
+                        return nodes[randomIndex].Position;*/
+
+
+            var randomX = CellSize * Randomizer.Next(0, LineCellsCount - 1);
+            var randomY = CellSize * Randomizer.Next(0, ColumnCellsCount - 1);
+
+
+            return FirstNodePosition + new Vector2(randomX, randomY);
         }
 
 
