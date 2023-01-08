@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Collections;
 using System;
 using Xonix.LevelHandling;
@@ -16,8 +14,6 @@ namespace Xonix
 {
     public class XonixGame : MonoBehaviour
     {
-        private static XonixGame _instance;
-
         private const string GameOverSoundPath = "Audio/Game/GameOverSound";
         private const float GameOverDelaySeconds = 2f;
 
@@ -33,11 +29,7 @@ namespace Xonix
         [SerializeField] private LevelHandler _levelHandler;
         [SerializeField] private EntitiesHandler _entitiesHandler;
 
-        private IEnumerable<Enemy> _enemies;
         private int _score = 0;
-
-
-        public static IEnumerable<Enemy> SeaEnemies => _instance._enemies;
 
 
 
@@ -51,8 +43,6 @@ namespace Xonix
 
             await _entitiesHandler.InitAsync(_grid, _levelHandler);
 
-            _enemies = _entitiesHandler.SeaEnemies;
-
             #region [Entities Init]
 
             _entitiesHandler.Player.OnLivesEnd += EndGame;
@@ -65,14 +55,13 @@ namespace Xonix
 
             #endregion
 
+            _grid.OnSeaNodesPercentChange += _printUI.SetFillPercent;
             _grid.OnSeaNodesPercentChange += _levelHandler.CheckForLevelComplete;
 
             _levelHandler.LevelEndTimer.OnTimerEnded += EndGame;
             _levelHandler.LevelEndTimer.OnTickPassed += () => _printUI.SetTimeSeconds(_levelHandler.TimeLeft);
 
             #region [Print UI Init]
-
-            _grid.OnSeaNodesPercentChange += _printUI.SetFillPercent;
 
             _printUI.SetLevelNumber(_levelHandler.CurrentLevel);
             _printUI.SetLivesNumber(_entitiesHandler.Player.Lives);
@@ -115,23 +104,11 @@ namespace Xonix
 
         private void Awake()
         {
-            #region [Singleton]
-
-            if (_instance != null)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            _instance = this;
-
-            #endregion
-
             Init();
         }
 
 #if UNITY_EDITOR
-        // TEST
+        // For correct testing
         private void OnApplicationQuit()
         {
             EndGame();

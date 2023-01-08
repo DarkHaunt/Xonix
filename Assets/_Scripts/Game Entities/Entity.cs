@@ -7,8 +7,10 @@ using System;
 namespace Xonix.Entities
 {
     using static XonixGrid;
-    using static GridNodeSource;
 
+    /// <summary>
+    /// Base class of all entities in the game
+    /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public abstract class Entity : MonoBehaviour
     {
@@ -29,9 +31,18 @@ namespace Xonix.Entities
 
 
 
-        public abstract void MoveIntoNode(GridNode node);
-
         protected abstract void OnOutField();
+
+        protected abstract void MoveIntoNode(GridNode node);
+
+        public virtual void Init(Vector2 initPosition, Sprite sprite, XonixGrid grid)
+        {
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _spriteRenderer.sprite = sprite;
+            _grid = grid;
+
+            transform.position = initPosition;
+        }
 
         public void Move()
         {
@@ -44,19 +55,10 @@ namespace Xonix.Entities
             MoveIntoNode(node);
         }
 
-        protected void NotifyThatSteppedOnTrail() => OnTrailNodeStepped?.Invoke();
-
         public void StopMoving() => SetMoveDirection(Vector2.zero);
 
-        public virtual void Init(Vector2 initPosition, Sprite sprite, XonixGrid grid)
-        {
-            _spriteRenderer = GetComponent<SpriteRenderer>();
-            _spriteRenderer.sprite = sprite;
-            _grid = grid;
-
-            transform.position = initPosition;
-        }
-
         protected void SetMoveDirection(Vector2 newDirection) => _moveDirection = newDirection;
+
+        protected void NotifyThatSteppedOnTrail() => OnTrailNodeStepped?.Invoke();
     }
 }

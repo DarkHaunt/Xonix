@@ -14,7 +14,7 @@ namespace Xonix.LevelHandling
 
         private const float TimerTickDurationInSeconds = 60f; // Timer counts minutes
         private const float GameEndTimeTicksCount = 90; // One and a half hour of max game time
-        private const float TargetSeaFieldCorruptionPercent = 0.5f; // A percent of corrupted sea field, when level will be completed
+        private const float TargetSeaFieldCorruptionPercent = 0.75f; // A percent of corrupted sea field, when level will be completed
 
         public static event Action OnLevelCompleted;
         public static event Action OnLevelLosen;

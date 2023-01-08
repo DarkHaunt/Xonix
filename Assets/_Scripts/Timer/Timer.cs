@@ -19,8 +19,8 @@ namespace Xonix
 
         private CancellationTokenSource _timerCountingCancellationTokenSource;
 
-        private float _tickDurationSeconds;
-        private float _targetCountOfTicks;
+        private readonly float _tickDurationSeconds;
+        private readonly float _targetCountOfTicks;
         private int _passedTicks = 0;
 
 
@@ -82,8 +82,6 @@ namespace Xonix
 
         private void CancelTickCounting()
         {
-            UnityEngine.MonoBehaviour.print("Cancel");
-
             if (!_timerCountingCancellationTokenSource.IsCancellationRequested)
                 _timerCountingCancellationTokenSource.Cancel();
         }

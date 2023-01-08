@@ -14,8 +14,8 @@ namespace Xonix.Entities
 
     public class EntitiesHandler : MonoBehaviour
     {
-        private const int IndexOfFirstSeaEnemy = 1; // For the enemy collection
-        private const int StartCountOfSeaEnemies = 1;
+        private const int IndexOfFirstSeaEnemy = 1; // For sea enemy collection get
+        private const int StartCountOfSeaEnemies = 3;
         private const float EntitiesMoveTimeDelaySeconds = 0.03f;
 
         public event Action OnEnemyTouchPlayer;
@@ -74,7 +74,7 @@ namespace Xonix.Entities
 
         private async Task SpawnPlayer()
         {
-            var playerSpawnTask = _entitySpawner.SpawnPlayer();
+            var playerSpawnTask = _entitySpawner.SpawnPlayer(SeaEnemies);
             await playerSpawnTask;
 
             _player = playerSpawnTask.Result;

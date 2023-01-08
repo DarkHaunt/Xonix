@@ -22,6 +22,7 @@ namespace Xonix.Entities.EnemyComponents
             [EnemyType.SeaEnemy] = NodeState.Earth,
         };
 
+
         private readonly EnemyType _enemyType;
         private readonly XonixGrid _grid;
 

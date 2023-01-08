@@ -16,7 +16,7 @@ namespace Xonix.Entities
 
 
 
-        public override void MoveIntoNode(GridNode node)
+        protected override void MoveIntoNode(GridNode node)
         {
             if (_bounceBehaviour.IsNodeHasBorderState(node))
                 SetMoveDirection(_bounceBehaviour.GetBounceDirection(Position, MoveDirection));

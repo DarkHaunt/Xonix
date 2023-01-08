@@ -38,12 +38,12 @@ namespace Xonix.Entities
 
 
 
-        public async Task InitAsync(Vector2 initPosition, Sprite sprite, XonixGrid grid)
+        public async Task InitAsync(Vector2 initPosition, Sprite sprite, XonixGrid grid, IEnumerable<Enemy> seaEnemeies)
         {
             base.Init(initPosition, sprite, grid);
 
             _trailMarker = new TrailMarker();
-            _corrupter = new Corrupter(grid);
+            _corrupter = new Corrupter(grid, seaEnemeies);
 
             var deathSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(DeathSoundPath).Task;
 
@@ -64,7 +64,7 @@ namespace Xonix.Entities
             XonixGame.OnGameOver += OnDisable;
         }
 
-        public override void MoveIntoNode(GridNode node)
+        protected override void MoveIntoNode(GridNode node)
         {
             // For optimization
             if (MoveDirection == Vector2.zero)

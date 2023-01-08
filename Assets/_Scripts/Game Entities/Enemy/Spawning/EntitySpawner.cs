@@ -57,13 +57,13 @@ namespace Xonix.Entities
             return enemy;
         }
 
-        public async Task<Player> SpawnPlayer()
+        public async Task<Player> SpawnPlayer(IEnumerable<Enemy> seaEnemies)
         {
             var playerInitPosition = _grid.GetFieldTopCenterPosition();
 
             var player = new GameObject($"Player").AddComponent<Player>();
 
-            await player.InitAsync(playerInitPosition, _playerSprite, _grid);
+            await player.InitAsync(playerInitPosition, _playerSprite, _grid, seaEnemies);
 
             LevelHandler.OnLevelLosen += () => player.transform.position = playerInitPosition;
             LevelHandler.OnLevelCompleted += () => player.transform.position = playerInitPosition;

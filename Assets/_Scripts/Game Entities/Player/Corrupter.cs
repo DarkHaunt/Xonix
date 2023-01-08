@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine;
+using Xonix.Entities;
 using Xonix.Grid;
 
 
@@ -27,15 +28,17 @@ namespace Xonix.Entities.PlayerComponents
         };
 
         private readonly XonixGrid _grid;
+        private readonly IEnumerable<Enemy> _seaEnemies;
 
         private GridNodeSource _corruptedNodeSource;
         private GridNodeSource _nonCorruptedNodeSource;
 
 
 
-        public Corrupter(XonixGrid grid)
+        public Corrupter(XonixGrid grid, IEnumerable<Enemy> seaEnemies)
         {
             _grid = grid;
+            _seaEnemies = seaEnemies;
         }
 
 
@@ -138,7 +141,7 @@ namespace Xonix.Entities.PlayerComponents
         /// <returns></returns>
         private IEnumerable<Vector2> GetEnemiesPositions()
         {
-            foreach (var enemy in XonixGame.SeaEnemies)
+            foreach (var enemy in _seaEnemies)
                 yield return enemy.Position;
         }
 
