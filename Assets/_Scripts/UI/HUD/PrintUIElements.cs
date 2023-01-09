@@ -6,7 +6,7 @@ using TMPro;
 namespace Xonix.UI
 {
     /// <summary>
-    /// All printed UI elements in the game
+    /// All printed text UI elements in the game
     /// </summary>
     public class PrintUIElements : MonoBehaviour
     {

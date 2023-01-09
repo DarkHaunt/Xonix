@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Xonix.Grid
 {
+    /// <summary>
+    /// Simple factory for node creation
+    /// </summary>
     public class GridNodeFactory
     {
         public GridNodeFactory() { }

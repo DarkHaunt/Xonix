@@ -1,17 +1,20 @@
 using System.Collections;
 using System;
+using UnityEngine.AddressableAssets;
+using UnityEngine;
 using Xonix.LevelHandling;
 using Xonix.Entities;
 using Xonix.Audio;
 using Xonix.Grid;
 using Xonix.UI;
-using UnityEngine.AddressableAssets;
-using UnityEngine;
 
 
 
 namespace Xonix
 {
+    /// <summary>
+    /// Class combiner for managing game elements
+    /// </summary>
     public class XonixGame : MonoBehaviour
     {
         private const string GameOverSoundPath = "Audio/Game/GameOverSound";
@@ -55,13 +58,10 @@ namespace Xonix
 
             #endregion
 
-            _grid.OnSeaNodesPercentChange += _printUI.SetFillPercent;
-            _grid.OnSeaNodesPercentChange += _levelHandler.CheckForLevelComplete;
-
-            _levelHandler.LevelEndTimer.OnTimerEnded += EndGame;
-            _levelHandler.LevelEndTimer.OnTickPassed += () => _printUI.SetTimeSeconds(_levelHandler.TimeLeft);
 
             #region [Print UI Init]
+
+            _grid.OnSeaNodesPercentChange += _printUI.SetFillPercent;
 
             _printUI.SetLevelNumber(_levelHandler.CurrentLevel);
             _printUI.SetLivesNumber(_entitiesHandler.Player.Lives);
@@ -70,6 +70,16 @@ namespace Xonix
             LevelHandler.OnLevelCompleted += () => _printUI.SetLevelNumber(_levelHandler.CurrentLevel);
             LevelHandler.OnLevelLosen += () => _printUI.SetLivesNumber(_entitiesHandler.Player.Lives);
             LevelHandler.OnLevelCompleted += () => _printUI.SetFillPercent(0f);
+
+            #endregion
+
+
+            #region [Level Handler Init]
+
+            _grid.OnSeaNodesPercentChange += _levelHandler.CheckForLevelComplete;
+
+            _levelHandler.LevelEndTimer.OnTimerEnded += EndGame;
+            _levelHandler.LevelEndTimer.OnTickPassed += () => _printUI.SetTimeSeconds(_levelHandler.TimeLeft);
 
             #endregion
 
@@ -107,12 +117,9 @@ namespace Xonix
             Init();
         }
 
-#if UNITY_EDITOR
-        // For correct testing
         private void OnApplicationQuit()
         {
             EndGame();
         }
-#endif
     }
 }

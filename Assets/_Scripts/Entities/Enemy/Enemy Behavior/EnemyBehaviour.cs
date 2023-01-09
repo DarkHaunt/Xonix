@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-using Xonix.Grid;
 using UnityEngine;
+using Xonix.Grid;
 
 
 
@@ -9,32 +8,32 @@ namespace Xonix.Entities.EnemyComponents
     using static GridNodeSource;
 
     /// <summary>
-    /// Controlls enemy bouncing from border
+    /// Controlls enemy bouncing from border and positioning
     /// </summary>
-    public class EnemyBounceBehaviour
+    public abstract class EnemyBehaviour
     {
-        /// <summary>
-        /// A node state, that this enemy type perceives as border, and bounce from it
-        /// </summary>
-        private static readonly Dictionary<EnemyType, NodeState> EnemyTypeBorderNodeState = new Dictionary<EnemyType, NodeState>(2)
-        {
-            [EnemyType.EarthEnemy] = NodeState.Sea,
-            [EnemyType.SeaEnemy] = NodeState.Earth,
-        };
-
-
-        private readonly EnemyType _enemyType;
+        private readonly NodeState _borderNodeState;
         private readonly XonixGrid _grid;
 
 
 
-        public EnemyBounceBehaviour(EnemyType enemyType, XonixGrid grid)
+        protected XonixGrid Grid => _grid;
+
+
+
+        public EnemyBehaviour(NodeState borderNodeState, XonixGrid grid)
         {
-            _enemyType = enemyType;
+            _borderNodeState = borderNodeState;
             _grid = grid;
         }
 
 
+
+        /// <summary>
+        /// Position of initialization on grid
+        /// </summary>
+        /// <returns></returns>
+        public abstract Vector2 GetInitPosition();
 
         public Vector2 GetBounceDirection(Vector2 currentNodePosition, Vector2 currentDirection)
         {
@@ -60,7 +59,7 @@ namespace Xonix.Entities.EnemyComponents
             return new Vector2(currentDirection.x, -currentDirection.y);
         }
 
-        public bool IsNodeHasBorderState(GridNode node) => EnemyTypeBorderNodeState[_enemyType] == node.State;
+        public bool IsNodeHasBorderState(GridNode node) => _borderNodeState == node.State;
 
         private bool IsBorderInPosition(Vector2 position)
         {
@@ -70,14 +69,6 @@ namespace Xonix.Entities.EnemyComponents
                 return IsNodeHasBorderState(node);
 
             return isNodeOutOfGameField;
-        }
-
-
-
-        public enum EnemyType
-        {
-            SeaEnemy,
-            EarthEnemy
         }
     }
 }

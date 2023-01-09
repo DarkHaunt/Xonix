@@ -1,6 +1,6 @@
-using UnityEngine;
 using System;
 using UnityEngine.UI;
+using UnityEngine;
 
 
 
@@ -11,7 +11,8 @@ namespace Xonix
         public static event Action OnPause;
         public static event Action OnResume;
 
-        [Header("--- Canvases ---")]
+
+        [Header("--- Canvas ---")]
         [SerializeField] private Canvas _pauseCanvas;
 
         [Header("--- Buttons ---")]
@@ -19,6 +20,14 @@ namespace Xonix
         [SerializeField] private Button _resumeButton;
 
 
+
+        private void Init()
+        {
+            _pauseCanvas.gameObject.SetActive(false);
+
+            _pauseButton.onClick.AddListener(Pause);
+            _resumeButton.onClick.AddListener(Resume);
+        }
 
         private void Resume()
         {
@@ -40,12 +49,10 @@ namespace Xonix
             OnPause?.Invoke();
         }
 
-        private void Init()
+        private void CheckForOnFocusPause(bool isFocused)
         {
-            _pauseCanvas.gameObject.SetActive(false);
-
-            _pauseButton.onClick.AddListener(Pause);
-            _resumeButton.onClick.AddListener(Resume);
+            if (!isFocused) // If player losesd application focus - pause the game
+                Pause();
         }
 
 
@@ -53,6 +60,16 @@ namespace Xonix
         private void Awake()
         {
             Init();
+        }
+
+        private void OnEnable()
+        {
+            Application.focusChanged += CheckForOnFocusPause;
+        }
+
+        private void OnDisable()
+        {
+            Application.focusChanged -= CheckForOnFocusPause;
         }
     }
 }

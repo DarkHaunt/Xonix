@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 using UnityEngine;
-using Xonix.Entities.EnemyComponents;
 using Xonix.LevelHandling;
 using Xonix.Grid;
 
@@ -10,22 +8,23 @@ using Xonix.Grid;
 
 namespace Xonix.Entities
 {
-    using static EnemyBounceBehaviour;
+    using static EntitySpawner;
 
+    /// <summary>
+    /// Processes entity spawning and moving
+    /// </summary>
     public class EntitiesHandler : MonoBehaviour
     {
         private const int IndexOfFirstSeaEnemy = 1; // For sea enemy collection get
         private const int StartCountOfSeaEnemies = 3;
         private const float EntitiesMoveTimeDelaySeconds = 0.03f;
 
-        public event Action OnEnemyTouchPlayer;
 
+        private LevelHandler _levelHandler;
 
         private EntitySpawner _entitySpawner;
         private List<Enemy> _enemies;
         private Player _player;
-
-        private LevelHandler _levelHandler;
 
         private Timer _entitiesMovingDelayTimer;
 
@@ -63,7 +62,6 @@ namespace Xonix.Entities
 
 
             LevelHandler.OnLevelCompleted += () => SpawnEnemy(EnemyType.SeaEnemy);
-            OnEnemyTouchPlayer += _levelHandler.LoseLevel;
 
 
             _entitiesMovingDelayTimer.OnTickPassed += MoveAllEntities;
@@ -85,15 +83,13 @@ namespace Xonix.Entities
             LevelHandler.OnLevelCompleted += _player.StopMoving;
         }
 
-        private Enemy SpawnEnemy(EnemyType type)
+        private void SpawnEnemy(EnemyType type)
         {
             var enemy = _entitySpawner.SpawnEnemy(type);
             _enemies.Add(enemy);
 
             XonixGame.OnGameOver += enemy.StopMoving;
             enemy.OnTrailNodeStepped += _levelHandler.LoseLevel;
-
-            return enemy;
         }
 
         private void MoveAllEntities()
@@ -105,7 +101,7 @@ namespace Xonix.Entities
                 entity.Move();
 
                 if (entity.Position == _player.Position)
-                    OnEnemyTouchPlayer?.Invoke();
+                    _levelHandler.LoseLevel();
             }
         }
     }

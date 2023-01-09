@@ -2,17 +2,13 @@ using UnityEngine.AddressableAssets;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 using Xonix.Entities.EnemyComponents;
-using Xonix.LevelHandling;
 using Xonix.Grid;
 
 
 
 namespace Xonix.Entities
 {
-    using static EnemyBounceBehaviour;
-
     /// <summary>
     /// A spawner for all types of entities in the game
     /// </summary>
@@ -24,9 +20,6 @@ namespace Xonix.Entities
 
         private readonly XonixGrid _grid;
 
-        private Dictionary<EnemyType, Sprite> SpritesOfEnemyWithType;
-        private Dictionary<EnemyType, Func<Vector2>> GetPositionOfEnemyWithType;
-
         private Sprite _seaEnemySprite;
         private Sprite _earthEnemySprite;
         private Sprite _playerSprite;
@@ -34,7 +27,7 @@ namespace Xonix.Entities
 
 
         /// <summary>
-        /// Needs grid for calculate positions of entities
+        /// Needs grid for entities initialization
         /// </summary>
         /// <param name="grid"></param>
         public EntitySpawner(XonixGrid grid)
@@ -46,27 +39,19 @@ namespace Xonix.Entities
 
         public Enemy SpawnEnemy(EnemyType type)
         {
-            var enemyPosition = GetPositionOfEnemyWithType[type].Invoke();
-            var enemySprite = SpritesOfEnemyWithType[type];
+            var spawnData = GetEnemeySpawnData(type);
 
-            var enemy = new GameObject($"{type}").AddComponent<Enemy>();
-            enemy.Init(type, enemyPosition, enemySprite, _grid);
-
-            LevelHandler.OnLevelCompleted += () => enemy.transform.position = GetPositionOfEnemyWithType[type].Invoke();
+            var enemy = new GameObject($"{spawnData.Behavior}").AddComponent<Enemy>();
+            enemy.Init(spawnData , _grid);
 
             return enemy;
         }
 
         public async Task<Player> SpawnPlayer(IEnumerable<Enemy> seaEnemies)
         {
-            var playerInitPosition = _grid.GetFieldTopCenterPosition();
-
             var player = new GameObject($"Player").AddComponent<Player>();
 
-            await player.InitAsync(playerInitPosition, _playerSprite, _grid, seaEnemies);
-
-            LevelHandler.OnLevelLosen += () => player.transform.position = playerInitPosition;
-            LevelHandler.OnLevelCompleted += () => player.transform.position = playerInitPosition;
+            await player.InitAsync(_playerSprite, _grid, seaEnemies);
 
             return player;
         }
@@ -82,19 +67,39 @@ namespace Xonix.Entities
             _seaEnemySprite = seaEnemySpriteLoadingTask.Result;
             _earthEnemySprite = earthEnemySpriteLoadingTask.Result;
             _playerSprite = playerSpriteLoadingTask.Result;
+        }
 
-
-            SpritesOfEnemyWithType = new Dictionary<EnemyType, Sprite>(2)
+        private EnemySpawnData GetEnemeySpawnData(EnemyType type)
+        {
+            return type switch
             {
-                [EnemyType.SeaEnemy] = _seaEnemySprite,
-                [EnemyType.EarthEnemy] = _earthEnemySprite,
-            };
+                EnemyType.SeaEnemy => new EnemySpawnData(_seaEnemySprite, new SeaEnemyBehavior(_grid)),
 
-            GetPositionOfEnemyWithType = new Dictionary<EnemyType, Func<Vector2>>(2)
-            {
-                [EnemyType.SeaEnemy] = _grid.GetRandomSeaFieldNodePosition,
-                [EnemyType.EarthEnemy] = _grid.GetFieldBottomCenterPosition
+                EnemyType.EarthEnemy => new EnemySpawnData(_earthEnemySprite, new EarthEnemyBehavior(_grid)),
+
+                _ => throw new UnityException($"EnemySpawner can't spawn enemy of type {type}!"),
             };
+        }
+
+
+
+        public struct EnemySpawnData
+        {
+            public readonly Sprite Sprite;
+            public readonly EnemyBehaviour Behavior;
+
+
+            public EnemySpawnData(Sprite sprite, EnemyBehaviour behaviour)
+            {
+                Sprite = sprite;
+                Behavior = behaviour;
+            }
+        }
+
+        public enum EnemyType
+        {
+            SeaEnemy,
+            EarthEnemy,
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Xonix.Entities.PlayerComponents
     {
         private const string TrailNodeSource = "Grid/NodeSource/TrailNodeSource";
 
-        private readonly Dictionary<GridNode, Vector2> _nodesDirections = new Dictionary<GridNode, Vector2>();
+        private readonly Dictionary<GridNode, Vector2> _nodesDirections = new Dictionary<GridNode, Vector2>(); // Nodes with directions of how they were visited
         private GridNodeSource _trailNodeSource;
 
         

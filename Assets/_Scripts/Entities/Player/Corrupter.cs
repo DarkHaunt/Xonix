@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 using UnityEngine;
-using Xonix.Entities;
 using Xonix.Grid;
 
 
@@ -12,14 +11,15 @@ namespace Xonix.Entities.PlayerComponents
     using static XonixGrid;
 
     /// <summary>
-    /// Marks zone without enemy by the 
+    /// Corrupts zone of nodes without enemies, setting different node source
     /// </summary>
     public class Corrupter
     {
         private const string EarthNodeSource = "Grid/NodeSource/EarthNodeSource";
         private const string SeaNodeSource = "Grid/NodeSource/SeaNodeSource";
 
-        private readonly Vector2[] _neighboursTemplates = new Vector2[4] // Convenient node neighbours position
+
+        private readonly Vector2[] _neighbourNodesPositionTemplates = new Vector2[4] // 4-direction neighbour node positions templates
         {
             new Vector2(0f, CellSize),
             new Vector2(0f, -CellSize),
@@ -38,12 +38,12 @@ namespace Xonix.Entities.PlayerComponents
         public Corrupter(XonixGrid grid, IEnumerable<Enemy> seaEnemies)
         {
             _grid = grid;
-            _seaEnemies = seaEnemies;
+            _seaEnemies = seaEnemies; // Earth enemy will never be in zone, so it can be ignored
         }
 
 
 
-        public async Task InitNodeSourcesForCorruptionAsync()
+        public async Task InitAsync()
         {
             var earthNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(EarthNodeSource).Task;
             var seaNodeSourceLoadingTask = Addressables.LoadAssetAsync<GridNodeSource>(SeaNodeSource).Task;
@@ -55,20 +55,22 @@ namespace Xonix.Entities.PlayerComponents
         }
 
         /// <summary>
-        /// Mark closed with corrupted or grid border zone with corruption source
+        /// Corrupts all non-corrupted nodes in enclosed zone with seed node position
         /// </summary>
         /// <param name="seedNodePosition">Corruption start node</param>
         /// <param name="checkedPositions">Set of already checked postions for optimization</param>
         /// <returns>Count of corrupted nodes</returns>
-        public IEnumerable<GridNode> GetCorruptedZone(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
+        public IEnumerable<GridNode> GetCorruptedNodes(Vector2 seedNodePosition, ISet<Vector2> checkedPositions)
         {
+            // Realization is a simple non-recursive flood fiil algorithm.
+            // Non-checked 4-side neighbours get pushed in stack and will be checked for corruption
+            // Cycle will repeat until there will be no non-corrupted neighbours
+
             var uncheckedNodes = new Stack<GridNode>();
             var zoneNodes = new HashSet<GridNode>();
 
             var seedNode = GetNode(seedNodePosition);
             uncheckedNodes.Push(seedNode);
-
-            int corruptedNodeCount = 0;
 
             while (uncheckedNodes.Count != 0)
             {
@@ -81,12 +83,9 @@ namespace Xonix.Entities.PlayerComponents
                 checkedPositions.Add(currentPickedNode.Position);
 
                 if (currentPickedNode.State == _nonCorruptedNodeSource.State)
-                {
                     zoneNodes.Add(currentPickedNode);
-                    corruptedNodeCount++;
-                }
 
-                foreach (var neighbourTemplate in _neighboursTemplates)
+                foreach (var neighbourTemplate in _neighbourNodesPositionTemplates)
                     uncheckedNodes.Push(GetNode(currentPickedNode.Position + neighbourTemplate));
             }
 

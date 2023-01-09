@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System;
+using UnityEngine;
 using Xonix.LevelHandling;
 
 
@@ -9,6 +9,9 @@ namespace Xonix.Grid
 {
     using static StaticRandomizer;
 
+    /// <summary>
+    /// A field of nodes
+    /// </summary>
     public class XonixGrid : MonoBehaviour
     {
         #region [Grid Init Parameters]
@@ -39,9 +42,9 @@ namespace Xonix.Grid
 
         private GridNodeFactory _gridNodeFactory;
 
-        private SquareArea _seaNodesFieldArea;
+        private RectangularArea _seaNodesFieldArea;
 
-        private int _initSeaNodesCount = 0; // Count of sea nodes in the start of level
+        private int _initSeaNodesCount = 0; // Count of sea nodes at the intialization
 
 
 
@@ -49,8 +52,8 @@ namespace Xonix.Grid
         {
             _gridNodeFactory = new GridNodeFactory();
 
-            // Area of grid, which will be filled by sea tiles
-            _seaNodesFieldArea = new SquareArea
+            // A rectangular area of grid, which will be filled by sea tiles
+            _seaNodesFieldArea = new RectangularArea
                 (
                     leftBottomCornerPosition:
                         FirstNodePosition + EarthInitBorderAligment,
@@ -58,8 +61,6 @@ namespace Xonix.Grid
                     rightTopCornerPosition:
                         FirstNodePosition + new Vector2(LineUnitSize - 1, ColumnUnitSize - 1) - EarthInitBorderAligment
                 );
-
-
 
             int index = 0;
             for (float x = 0f, y = 0f; index < FullFieldSize; index++, x += CellSize)
@@ -91,6 +92,32 @@ namespace Xonix.Grid
             LevelHandler.OnLevelCompleted += ResetSeaField;
         }
 
+        public void RemoveSeaNodes(IEnumerable<GridNode> seaNodes)
+        {
+            _seaNodes.ExceptWith(seaNodes);
+
+            OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
+        }
+
+        public Vector2 GetFieldTopCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
+
+        public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
+
+        public Vector2 GetGridCenter() => new Vector2(LineUnitSize / 2, ColumnUnitSize / 2) - new Vector2(CellSize / 2, CellSize / 2);
+
+        public Vector2 GetRandomSeaFieldNodePosition()
+        {
+            var randomX = CellSize * Randomizer.Next(InitEarthBorderWigthNodesCount, LineCellsCount - InitEarthBorderWigthNodesCount - 1);
+            var randomY = CellSize * Randomizer.Next(InitEarthBorderWigthNodesCount, ColumnCellsCount - InitEarthBorderWigthNodesCount -1);
+
+            return FirstNodePosition + new Vector2(randomX, randomY);
+        }
+
+        public bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
+        {
+            return _grid.TryGetValue(position, out node);
+        }
+
         private void ResetSeaField()
         {
             var currentNodePosition = _seaNodesFieldArea.LeftBottomCornerPosition;
@@ -115,32 +142,6 @@ namespace Xonix.Grid
             }
         }
 
-        public void RemoveSeaNodes(IEnumerable<GridNode> seaNodes)
-        {
-            _seaNodes.ExceptWith(seaNodes);
-
-            OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
-        }
-
-        public bool TryToGetNodeWithPosition(Vector2 position, out GridNode node)
-        {
-            return _grid.TryGetValue(position, out node);
-        }
-
-        public Vector2 GetFieldTopCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), ColumnUnitSize - CellSize);
-
-        public Vector2 GetFieldBottomCenterPosition() => FirstNodePosition + new Vector2(Mathf.Round(LineUnitSize / 2), 0f);
-
-        public Vector2 GetGridCenter() => new Vector2(LineUnitSize / 2, ColumnUnitSize / 2) - new Vector2(CellSize / 2, CellSize / 2);
-
-        public Vector2 GetRandomSeaFieldNodePosition()
-        {
-            var randomX = CellSize * Randomizer.Next(InitEarthBorderWigthNodesCount, LineCellsCount - InitEarthBorderWigthNodesCount - 1);
-            var randomY = CellSize * Randomizer.Next(InitEarthBorderWigthNodesCount, ColumnCellsCount - InitEarthBorderWigthNodesCount -1);
-
-            return FirstNodePosition + new Vector2(randomX, randomY);
-        }
-
 
 
         private void Awake()
@@ -151,15 +152,15 @@ namespace Xonix.Grid
 
 
         /// <summary>
-        /// Sub class to convenience sea init area calculation
+        /// Class, that simplifies border check for rectangles
         /// </summary>
-        private class SquareArea
+        private class RectangularArea
         {
             public readonly Vector2 LeftBottomCornerPosition;
             public readonly Vector2 RightTopCornerPosition;
 
 
-            public SquareArea(Vector2 leftBottomCornerPosition, Vector2 rightTopCornerPosition)
+            public RectangularArea(Vector2 leftBottomCornerPosition, Vector2 rightTopCornerPosition)
             {
                 LeftBottomCornerPosition = leftBottomCornerPosition;
                 RightTopCornerPosition = rightTopCornerPosition;

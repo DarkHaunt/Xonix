@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Xonix.Grid
 {
     /// <summary>
-    /// The init data for nodes
+    /// An init data for nodes in the game
     /// </summary>
     [CreateAssetMenu(fileName = "Node Source", menuName = "Grid/NodeSource", order = 51)]
     public class GridNodeSource : ScriptableObject
@@ -24,9 +24,9 @@ namespace Xonix.Grid
 
         public enum NodeState
         {
-            Sea = 0x001,
-            Earth = 0x010,
-            Trail = 0x100
+            Sea,
+            Earth,
+            Trail
         }
     }
 }

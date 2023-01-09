@@ -18,6 +18,7 @@ namespace Xonix.Entities
     public class Player : Entity
     {
         private const string DeathSoundPath = "Audio/Player/DeathSound";
+
         private const int StartLifesCount = 3;
 
 
@@ -28,30 +29,34 @@ namespace Xonix.Entities
         private Corrupter _corrupter;
 
         private AudioClip _deathClip;
+        private Vector2 _initPosition;
 
-        private int _lifesCount = StartLifesCount;
+        private int _livesCount = StartLifesCount;
         private bool _isTrailing = false;
 
 
 
-        public int Lives => _lifesCount;
+        public int Lives => _livesCount;
 
 
 
-        public async Task InitAsync(Vector2 initPosition, Sprite sprite, XonixGrid grid, IEnumerable<Enemy> seaEnemeies)
+        public async Task InitAsync(Sprite sprite, XonixGrid grid, IEnumerable<Enemy> seaEnemeies)
         {
-            base.Init(initPosition, sprite, grid);
+            _initPosition = grid.GetFieldTopCenterPosition();
+
+            base.Init(_initPosition, sprite, grid);
 
             _trailMarker = new TrailMarker();
             _corrupter = new Corrupter(grid, seaEnemeies);
 
             var deathSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(DeathSoundPath).Task;
 
-            await Task.WhenAll(_trailMarker.InitTrailSource(), _corrupter.InitNodeSourcesForCorruptionAsync(), deathSoundLoadingTask);
+            await Task.WhenAll(_trailMarker.InitTrailSource(), _corrupter.InitAsync(), deathSoundLoadingTask);
 
             _deathClip = deathSoundLoadingTask.Result;
 
-            LevelHandler.OnLevelLosen += DecreaseLifesCount;
+            LevelHandler.OnLevelLosen += ResetPosition;
+            LevelHandler.OnLevelLosen += DecreaseLivesCount;
             LevelHandler.OnLevelLosen += () =>
             {
                 _isTrailing = false;
@@ -80,13 +85,15 @@ namespace Xonix.Entities
                     break;
                 case NodeState.Trail:
                     NotifyThatSteppedOnTrail();
-                    return; // Don't move if steped
+                    return; // Don't move if stepped on trail
                 default:
                     break;
             }
 
             transform.Translate(MoveTranslation);
         }
+
+        protected override void ResetPosition() => transform.position = _initPosition;
 
         protected override void OnOutField()
         {
@@ -132,12 +139,12 @@ namespace Xonix.Entities
                 var firstNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeClockwise();
 
                 if (!checkedNodePositions.Contains(firstNeighborNodePosition))
-                    corruptedNodes.UnionWith(_corrupter.GetCorruptedZone(firstNeighborNodePosition, checkedNodePositions));
+                    corruptedNodes.UnionWith(_corrupter.GetCorruptedNodes(firstNeighborNodePosition, checkedNodePositions));
 
                 var secondNeighborNodePosition = node.Position + nodeWalkDirection.RotateFor90DegreeCounterClockwise();
 
                 if (!checkedNodePositions.Contains(secondNeighborNodePosition))
-                    corruptedNodes.UnionWith(_corrupter.GetCorruptedZone(secondNeighborNodePosition, checkedNodePositions));
+                    corruptedNodes.UnionWith(_corrupter.GetCorruptedNodes(secondNeighborNodePosition, checkedNodePositions));
             }
 
             // Notify for each node, that has been corrupted
@@ -147,11 +154,11 @@ namespace Xonix.Entities
             _trailMarker.ClearTrail();
         }
 
-        private void DecreaseLifesCount()
+        private void DecreaseLivesCount()
         {
-            _lifesCount--;
+            _livesCount--;
 
-            if (_lifesCount == 0)
+            if (_livesCount == 0)
             {
                 OnLivesEnd?.Invoke();
                 return;
@@ -160,7 +167,11 @@ namespace Xonix.Entities
             SoundManager.PlayClip(_deathClip);
         }
 
-        private void GetSwipedMoveDirection(LeanFinger finger)
+        /// <summary>
+        /// Sets player direction according to current swiped finger
+        /// </summary>
+        /// <param name="finger"></param>
+        private void SetSwipedMoveDirection(LeanFinger finger)
         {
             var direction = (finger.LastScreenPosition - finger.StartScreenPosition).normalized;
 
@@ -184,13 +195,13 @@ namespace Xonix.Entities
 
         private void OnEnable()
         {
-            LeanTouch.OnFingerSwipe += GetSwipedMoveDirection;
+            LeanTouch.OnFingerSwipe += SetSwipedMoveDirection;
             LeanTouch.OnFingerTap += PlayerStopMoving;
         }
 
         private void OnDisable()
         {
-            LeanTouch.OnFingerSwipe -= GetSwipedMoveDirection;
+            LeanTouch.OnFingerSwipe -= SetSwipedMoveDirection;
             LeanTouch.OnFingerTap -= PlayerStopMoving;
         }
     }

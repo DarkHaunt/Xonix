@@ -24,6 +24,7 @@ namespace Xonix.UI
             _animator.SetTrigger(FlickTriggerName);
         }
 
+        // Used in animator event
         private void OffCanvas() => _flickCanvas.gameObject.SetActive(false);
 
 

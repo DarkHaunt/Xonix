@@ -21,7 +21,12 @@ namespace Xonix
 
         private readonly float _tickDurationSeconds;
         private readonly float _targetCountOfTicks;
+
         private int _passedTicks = 0;
+
+
+
+        public float TicksLeft => _targetCountOfTicks - _passedTicks;
 
 
 

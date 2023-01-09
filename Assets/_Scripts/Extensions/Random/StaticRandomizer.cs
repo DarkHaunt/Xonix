@@ -3,7 +3,7 @@ using System;
 
 
 /// <summary>
-/// An instrument for comfortable random usage
+/// An instrument for comfortable system random usage
 /// </summary>
 public static class StaticRandomizer
 {

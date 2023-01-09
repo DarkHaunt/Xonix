@@ -1,6 +1,7 @@
-using UnityEngine;
-using Xonix.Grid;
 using System;
+using UnityEngine;
+using Xonix.LevelHandling;
+using Xonix.Grid;
 
 
 
@@ -16,11 +17,8 @@ namespace Xonix.Entities
     {
         public event Action OnTrailNodeStepped;
 
-
         private XonixGrid _grid;
-
         private SpriteRenderer _spriteRenderer;
-
         private Vector2 _moveDirection;
 
 
@@ -31,9 +29,11 @@ namespace Xonix.Entities
 
 
 
+        protected abstract void MoveIntoNode(GridNode node);
+
         protected abstract void OnOutField();
 
-        protected abstract void MoveIntoNode(GridNode node);
+        protected abstract void ResetPosition();
 
         public virtual void Init(Vector2 initPosition, Sprite sprite, XonixGrid grid)
         {
@@ -42,6 +42,8 @@ namespace Xonix.Entities
             _grid = grid;
 
             transform.position = initPosition;
+
+            LevelHandler.OnLevelCompleted += ResetPosition;
         }
 
         public void Move()

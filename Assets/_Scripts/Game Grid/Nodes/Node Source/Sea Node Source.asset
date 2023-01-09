@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nodeMaterial: {fileID: 2100000, guid: 0388f294f66dd4c499b70718bd960ac7, type: 2}
   _nodeSprite: {fileID: 21300000, guid: 13467c91bd21c354697a1daa3ef81170, type: 3}
-  _nodeState: 1
+  _nodeState: 0
