@@ -7,8 +7,7 @@ using Xonix.Entities;
 using Xonix.Audio;
 using Xonix.Grid;
 using Xonix.UI;
-
-
+using Xonix.Scenes;
 
 namespace Xonix
 {
@@ -87,7 +86,7 @@ namespace Xonix
 
             await gameOverSoundLoadingTask;
 
-            OnGameOver += () => SoundManager.PlayClip(gameOverSoundLoadingTask.Result);
+            OnGameOver += () => AudioManager2D.PlaySound(gameOverSoundLoadingTask.Result);
         }
 
         private void EndGame()
@@ -101,13 +100,15 @@ namespace Xonix
         {
             yield return new WaitForSeconds(GameOverDelaySeconds);
 
-#if UNITY_EDITOR
+            SceneLoader.LoadMainMenu();
+
+/*#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #endif
 
 #if UNITY_ANDROID_API
             Application.Quit();
-#endif
+#endif*/
         }
 
 

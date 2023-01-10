@@ -40,7 +40,7 @@ namespace Xonix.LevelHandling
 
             await levelUpSoundLoadingTask;
 
-            OnLevelCompleted += () => SoundManager.PlayClip(levelUpSoundLoadingTask.Result);
+            OnLevelCompleted += () => AudioManager2D.PlaySound(levelUpSoundLoadingTask.Result);
 
             _levelEndTimer = new Timer(TimerTickDurationInSeconds, GameEndTimeTicksCount);
 

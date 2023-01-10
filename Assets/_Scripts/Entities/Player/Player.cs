@@ -164,7 +164,7 @@ namespace Xonix.Entities
                 return;
             }
 
-            SoundManager.PlayClip(_deathClip);
+            AudioManager2D.PlaySound(_deathClip);
         }
 
         /// <summary>
