@@ -24,6 +24,7 @@ namespace Xonix.Entities
 
         public event Action<ISet<GridNode>> OnNodesCorrupted;
         public event Action OnLivesEnd;
+        public event Action<int> OnLivesCountChanged;
 
         private TrailMarker _trailMarker;
         private Corrupter _corrupter;
@@ -54,19 +55,6 @@ namespace Xonix.Entities
             await Task.WhenAll(_trailMarker.InitTrailSource(), _corrupter.InitAsync(), deathSoundLoadingTask);
 
             _deathClip = deathSoundLoadingTask.Result;
-
-            LevelHandler.OnLevelLosen += ResetPosition;
-            LevelHandler.OnLevelLosen += DecreaseLivesCount;
-            LevelHandler.OnLevelLosen += () =>
-            {
-                _isTrailing = false;
-
-                // Set trail marked nodes as non-disturbed
-                _corrupter.DecorruptNodes(_trailMarker.TrailNodesDirections.Keys);
-                _trailMarker.ClearTrail();
-            };
-
-            XonixGame.OnGameOver += OnDisable;
         }
 
         protected override void MoveIntoNode(GridNode node)
@@ -115,6 +103,15 @@ namespace Xonix.Entities
             CorruptZonesAttachedToTrail();
         }
 
+        private void CancelTrailing()
+        {
+            _isTrailing = false;
+
+            // Set trail marked nodes as non-disturbed
+            _corrupter.DecorruptNodes(_trailMarker.TrailNodesDirections.Keys);
+            _trailMarker.ClearTrail();
+        }
+
         /// <summary>
         /// Corrupts all zones, that attached to current trail
         /// <para>
@@ -158,9 +155,12 @@ namespace Xonix.Entities
         {
             _livesCount--;
 
+            OnLivesCountChanged?.Invoke(_livesCount);
+
             if (_livesCount == 0)
             {
                 OnLivesEnd?.Invoke();
+                Destroy(gameObject);
                 return;
             }
 
@@ -193,14 +193,32 @@ namespace Xonix.Entities
 
 
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
+            LevelHandler.OnLevelLosen += ResetPosition;
+            LevelHandler.OnLevelLosen += DecreaseLivesCount;
+            LevelHandler.OnLevelLosen += CancelTrailing;
+            LevelHandler.OnLevelLosen += StopMoving;
+
+            LevelHandler.OnLevelCompleted += StopMoving;
+
             LeanTouch.OnFingerSwipe += SetSwipedMoveDirection;
             LeanTouch.OnFingerTap += PlayerStopMoving;
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
+
+            LevelHandler.OnLevelLosen -= ResetPosition;
+            LevelHandler.OnLevelLosen -= DecreaseLivesCount;
+            LevelHandler.OnLevelLosen -= CancelTrailing;
+            LevelHandler.OnLevelLosen -= StopMoving;
+
+            LevelHandler.OnLevelCompleted -= StopMoving;
+
             LeanTouch.OnFingerSwipe -= SetSwipedMoveDirection;
             LeanTouch.OnFingerTap -= PlayerStopMoving;
         }

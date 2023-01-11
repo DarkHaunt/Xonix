@@ -1,4 +1,5 @@
 using UnityEngine;
+using Xonix.LevelHandling;
 
 
 
@@ -33,7 +34,14 @@ namespace Xonix.UI
             _animator = GetComponent<Animator>();
             _flickCanvas = GetComponent<Canvas>();
 
+            LevelHandler.OnLevelLosen += FlickScreen;
+
             _flickCanvas.gameObject.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            LevelHandler.OnLevelLosen -= FlickScreen;
         }
     }
 }

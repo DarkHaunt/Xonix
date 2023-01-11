@@ -9,6 +9,8 @@ using Xonix.Grid;
 using Xonix.UI;
 using Xonix.Scenes;
 
+
+
 namespace Xonix
 {
     /// <summary>
@@ -17,7 +19,7 @@ namespace Xonix
     public class XonixGame : MonoBehaviour
     {
         private const string GameOverSoundPath = "Audio/Game/GameOverSound";
-        private const float GameOverDelaySeconds = 2f;
+        private const float GameOverDelaySeconds = 1f;
 
         public static event Action OnGameOver;
 
@@ -30,6 +32,9 @@ namespace Xonix
         [SerializeField] private XonixGrid _grid;
         [SerializeField] private LevelHandler _levelHandler;
         [SerializeField] private EntitiesHandler _entitiesHandler;
+
+
+        private AudioClip _gameOverClip;
 
         private ScoreCounter _scoreCounter;
 
@@ -69,9 +74,8 @@ namespace Xonix
             _printUI.SetLivesNumber(_entitiesHandler.Player.Lives);
             _printUI.SetTimeSeconds(_levelHandler.TimeLeft);
 
-            LevelHandler.OnLevelCompleted += () => _printUI.SetLevelNumber(_levelHandler.CurrentLevel);
-            LevelHandler.OnLevelLosen += () => _printUI.SetLivesNumber(_entitiesHandler.Player.Lives);
-            LevelHandler.OnLevelCompleted += () => _printUI.SetFillPercent(0f);
+            _entitiesHandler.Player.OnLivesCountChanged += _printUI.SetLivesNumber;
+            _levelHandler.OnLevelChanged += _printUI.SetLevelNumber;
 
             #endregion
 
@@ -89,13 +93,16 @@ namespace Xonix
 
             await gameOverSoundLoadingTask;
 
-            OnGameOver += () => AudioManager2D.PlaySound(gameOverSoundLoadingTask.Result);
+            _gameOverClip = gameOverSoundLoadingTask.Result;
+
             OnGameOver += _scoreCounter.TryToUpdateRecord;
         }
 
         private void EndGame()
         {
             OnGameOver?.Invoke();
+
+            AudioManager2D.PlaySound(_gameOverClip);
 
             StartCoroutine(GameOverCoroutine());
         }

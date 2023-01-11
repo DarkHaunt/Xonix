@@ -42,8 +42,6 @@ namespace Xonix.Entities
             _grid = grid;
 
             transform.position = initPosition;
-
-            LevelHandler.OnLevelCompleted += ResetPosition;
         }
 
         public void Move()
@@ -62,5 +60,17 @@ namespace Xonix.Entities
         protected void SetMoveDirection(Vector2 newDirection) => _moveDirection = newDirection;
 
         protected void NotifyThatSteppedOnTrail() => OnTrailNodeStepped?.Invoke();
+
+
+
+        protected virtual void OnEnable()
+        {
+            LevelHandler.OnLevelCompleted += ResetPosition;
+        }
+
+        protected virtual void OnDisable()
+        {
+            LevelHandler.OnLevelCompleted -= ResetPosition;
+        }
     }
 }

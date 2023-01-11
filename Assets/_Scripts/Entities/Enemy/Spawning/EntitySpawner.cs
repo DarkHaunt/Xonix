@@ -39,7 +39,7 @@ namespace Xonix.Entities
 
         public Enemy SpawnEnemy(EnemyType type)
         {
-            var spawnData = GetEnemeySpawnData(type);
+            var spawnData = GetEnemySpawnData(type);
 
             var enemy = new GameObject($"{spawnData.Behavior}").AddComponent<Enemy>();
             enemy.Init(spawnData , _grid);
@@ -69,7 +69,7 @@ namespace Xonix.Entities
             _playerSprite = playerSpriteLoadingTask.Result;
         }
 
-        private EnemySpawnData GetEnemeySpawnData(EnemyType type)
+        private EnemySpawnData GetEnemySpawnData(EnemyType type)
         {
             return type switch
             {

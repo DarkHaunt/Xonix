@@ -16,7 +16,7 @@ namespace Xonix.Entities
     public class EntitiesHandler : MonoBehaviour
     {
         private const int IndexOfFirstSeaEnemy = 1; // For sea enemy collection get
-        private const int StartCountOfSeaEnemies = 3;
+        private const int StartCountOfSeaEnemies = 1;
         private const float EntitiesMoveTimeDelaySeconds = 0.03f;
 
 
@@ -60,10 +60,6 @@ namespace Xonix.Entities
             for (int i = 0; i < StartCountOfSeaEnemies; i++)
                 SpawnEnemy(EnemyType.SeaEnemy);
 
-
-            LevelHandler.OnLevelCompleted += () => SpawnEnemy(EnemyType.SeaEnemy);
-
-
             _entitiesMovingDelayTimer.OnTickPassed += MoveAllEntities;
 #pragma warning disable CS4014 // “ак как этот вызов не ожидаетс€, выполнение существующего метода продолжаетс€ до тех пор, пока вызов не будет завершен
             _entitiesMovingDelayTimer.Start();
@@ -77,18 +73,15 @@ namespace Xonix.Entities
 
             _player = playerSpawnTask.Result;
             _player.OnTrailNodeStepped += _levelHandler.LoseLevel;
-
-            XonixGame.OnGameOver += _player.StopMoving;
-            LevelHandler.OnLevelLosen += _player.StopMoving;
-            LevelHandler.OnLevelCompleted += _player.StopMoving;
         }
+
+        private void SpawnSeaEnemy() => SpawnEnemy(EnemyType.SeaEnemy);
 
         private void SpawnEnemy(EnemyType type)
         {
             var enemy = _entitySpawner.SpawnEnemy(type);
             _enemies.Add(enemy);
 
-            XonixGame.OnGameOver += enemy.StopMoving;
             enemy.OnTrailNodeStepped += _levelHandler.LoseLevel;
         }
 
@@ -103,6 +96,18 @@ namespace Xonix.Entities
                 if (entity.Position == _player.Position)
                     _levelHandler.LoseLevel();
             }
+        }
+
+
+
+        private void OnEnable()
+        {
+            LevelHandler.OnLevelCompleted += SpawnSeaEnemy;
+        }
+
+        private void OnDisable()
+        {
+            LevelHandler.OnLevelCompleted -= SpawnSeaEnemy;
         }
     }
 }

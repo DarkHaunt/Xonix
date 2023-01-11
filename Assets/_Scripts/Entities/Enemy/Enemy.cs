@@ -44,5 +44,21 @@ namespace Xonix.Entities
         protected override void OnOutField() => SetMoveDirection(_behaviour.GetBounceDirection(Position, MoveDirection));
 
         protected override void ResetPosition() => transform.position = _behaviour.GetInitPosition();
+
+
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            XonixGame.OnGameOver += StopMoving;
+        }
+        
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            XonixGame.OnGameOver -= StopMoving;
+        }
     }
 }

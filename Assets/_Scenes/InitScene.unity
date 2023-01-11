@@ -372,7 +372,7 @@ Transform:
   - {fileID: 899582884}
   - {fileID: 406472793}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &721936786
 GameObject:
@@ -416,7 +416,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &899582882
 GameObject:
@@ -559,7 +559,7 @@ GameObject:
   - component: {fileID: 1261751000}
   - component: {fileID: 1261750999}
   m_Layer: 5
-  m_Name: --- Screen Effect Handler ---
+  m_Name: --- Screen Transition  Handler ---
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -577,7 +577,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccf65c3cbe70b2841be08f276b23fac8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _screenFlickAnimation: {fileID: 7400000, guid: 6f80ac7942d063447a9d27f6007ec3ce, type: 2}
   _screenFadeOutAnimation: {fileID: 7400000, guid: a6e70ecf9d23cc340a5a581f566509be, type: 2}
   _screenFadeInAnimation: {fileID: 7400000, guid: aaf4ad5b8cd99e54ea5d298b40a5b934, type: 2}
   _loadingScreenAnimation: {fileID: 7400000, guid: 2bde3f91681e66942a44b7f6af76d550, type: 2}
@@ -640,7 +639,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 3
   m_TargetDisplay: 0
 --- !u!224 &1261751003
 RectTransform:
@@ -655,7 +654,7 @@ RectTransform:
   m_Children:
   - {fileID: 290725658}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

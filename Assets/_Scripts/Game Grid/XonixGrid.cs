@@ -88,8 +88,6 @@ namespace Xonix.Grid
             }
 
             _initSeaNodesCount = _seaNodes.Count;
-
-            LevelHandler.OnLevelCompleted += ResetSeaField;
         }
 
         public void RemoveSeaNodes(IEnumerable<GridNode> seaNodes)
@@ -140,6 +138,8 @@ namespace Xonix.Grid
 
                 currentNodePosition.x += CellSize;
             }
+
+            OnSeaNodesPercentChange?.Invoke(1f - ((float)_seaNodes.Count / _initSeaNodesCount));
         }
 
 
@@ -147,6 +147,16 @@ namespace Xonix.Grid
         private void Awake()
         {
             Init();
+        }
+
+        private void OnEnable()
+        {
+            LevelHandler.OnLevelCompleted += ResetSeaField;
+        }
+
+        private void OnDisable()
+        {
+            LevelHandler.OnLevelCompleted -= ResetSeaField;
         }
 
 

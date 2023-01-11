@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
-using Xonix.LevelHandling;
 
 
 
@@ -16,11 +15,8 @@ namespace Xonix.UI
         private const string FadeInClipID = "---Fade In Clip---";
         private const string LoadingScreenClipID = "---Loading Screen Clip---";
 
-        private const string ScreenFlickClipID = "--- Red Flick ---";
 
-
-        [SerializeField] private AnimationClip _screenFlickAnimation;
-
+        [Header("--- Animations ---")]
         [SerializeField] private AnimationClip _screenFadeOutAnimation;
         [SerializeField] private AnimationClip _screenFadeInAnimation;
         [SerializeField] private AnimationClip _loadingScreenAnimation;
@@ -103,14 +99,12 @@ namespace Xonix.UI
             InitClip(_screenFadeOutAnimation, FadeOutClipID);
             InitClip(_screenFadeInAnimation, FadeInClipID);
             InitClip(_loadingScreenAnimation, LoadingScreenClipID);
-            InitClip(_screenFlickAnimation, ScreenFlickClipID);
 
             _loadingScreenAnimation.wrapMode = WrapMode.Loop;
 
             _transitionCancellationSource = new CancellationTokenSource();
 
             Application.quitting += () => _transitionCancellationSource.Cancel();
-            LevelHandler.OnLevelLosen += () => PlayAnimationClip(ScreenFlickClipID);
 
             gameObject.SetActive(false);
         }
