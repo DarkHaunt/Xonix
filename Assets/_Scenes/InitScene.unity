@@ -354,7 +354,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 654b0758c099f2948b103e0213191678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _masterMixerGroup: {fileID: 24300002, guid: 6c362f610b8b7c84e86f8f33b677ef72, type: 2}
   _soundMixerGroup: {fileID: 7169240241971401495, guid: 6c362f610b8b7c84e86f8f33b677ef72, type: 2}
   _musicMixerGroup: {fileID: -2670813044709155196, guid: 6c362f610b8b7c84e86f8f33b677ef72, type: 2}
   _musicSource: {fileID: 899582883}
@@ -641,7 +640,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!224 &1261751003
 RectTransform:

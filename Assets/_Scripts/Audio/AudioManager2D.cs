@@ -11,19 +11,16 @@ namespace Xonix.Audio
     {
         private static AudioManager2D _instance;
 
-        // Minimal sound volume in Db
+        // Default audio mixer volume parameterss
         private const float MinDbVolumeValue = -80f;
+        private const float DefaultDbVolumeValue = 0f;
 
         // Controlled mixer group exposed patameter names
-        private const string MasterVolumeExposedParameterName = "Master Volume";
         private const string MusicVolumeExposedParameterName = "Music Volume";
         private const string SoundVolumeExposedParameterName = "Sound Volume";
 
 
         [Header("--- Mixer Groups ---")]
-        [SerializeField] private AudioMixerGroup _masterMixerGroup;
-
-        [Space(5f)]
         [SerializeField] private AudioMixerGroup _soundMixerGroup;
 
         [Space(5f)]
@@ -57,24 +54,20 @@ namespace Xonix.Audio
             source.Play();
         }
 
-        /// <summary>
-        /// Changes a mixer group volume 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="mixerGroupType"></param>
-        public static void ChangeAudioVolume(float value, AudioMixerGroupType mixerGroupType)
+        public static void OffMixerGroupAudio(AudioMixerGroupType mixerGroupType)
         {
-            if (value < MinDbVolumeValue)
-                value = MinDbVolumeValue;
+            _instance._audioMixerGroupControllers[mixerGroupType].ChangeVolume(MinDbVolumeValue);
+        }
 
-            _instance._audioMixerGroupControllers[mixerGroupType].ChangeVolume(value);
+        public static void OnMixerGroupAudio(AudioMixerGroupType mixerGroupType)
+        {
+            _instance._audioMixerGroupControllers[mixerGroupType].ChangeVolume(DefaultDbVolumeValue);
         }
 
         private void Init()
         {
             _audioMixerGroupControllers = new Dictionary<AudioMixerGroupType, AudioMixerGroupController>()
             {
-                [AudioMixerGroupType.Master] = new AudioMixerGroupController(MasterVolumeExposedParameterName, _masterMixerGroup),
                 [AudioMixerGroupType.Music] = new AudioMixerGroupController(MusicVolumeExposedParameterName, _musicMixerGroup),
                 [AudioMixerGroupType.Sound] = new AudioMixerGroupController(SoundVolumeExposedParameterName, _soundMixerGroup),
             };
@@ -106,7 +99,6 @@ namespace Xonix.Audio
         [SerializeField]
         public enum AudioMixerGroupType
         {
-            Master,
             Sound,
             Music
         }

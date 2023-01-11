@@ -1,5 +1,4 @@
 using UnityEngine;
-using Xonix.LevelHandling;
 
 
 
@@ -17,7 +16,7 @@ namespace Xonix.UI
 
 
 
-        private void FlickScreen()
+        public void FlickScreen()
         {
             _flickCanvas.gameObject.SetActive(true);
 
@@ -33,8 +32,6 @@ namespace Xonix.UI
         {
             _animator = GetComponent<Animator>();
             _flickCanvas = GetComponent<Canvas>();
-
-            LevelHandler.OnLevelLosen += FlickScreen;
 
             _flickCanvas.gameObject.SetActive(false);
         }

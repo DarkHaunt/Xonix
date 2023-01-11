@@ -3,8 +3,7 @@ using System;
 using UnityEngine.AddressableAssets;
 using UnityEngine;
 using Xonix.Audio;
-
-
+using Xonix.UI;
 
 namespace Xonix.LevelHandling
 {
@@ -21,7 +20,6 @@ namespace Xonix.LevelHandling
 
         public static event Action OnLevelCompleted;
         public static event Action OnLevelLosen;
-
 
         private Timer _levelEndTimer;
 
@@ -40,7 +38,7 @@ namespace Xonix.LevelHandling
 
             await levelUpSoundLoadingTask;
 
-            OnLevelCompleted += () => AudioManager2D.PlaySound(levelUpSoundLoadingTask.Result);
+            OnLevelCompleted += () => AudioManager2D.PlaySound(levelUpSoundLoadingTask.Result); // TODO: —ƒелать не анонимный метод лл€ отписки  
 
             _levelEndTimer = new Timer(TimerTickDurationInSeconds, GameEndTimeTicksCount);
 
@@ -53,6 +51,7 @@ namespace Xonix.LevelHandling
         public void LoseLevel()
         {
             OnLevelLosen?.Invoke();
+
         }
 
         public void CheckForLevelComplete(float currentSeaCorruptionPercent)
