@@ -9,7 +9,7 @@ namespace Xonix.Entities.EnemyComponents
 
     public class EarthEnemyBehavior : EnemyBehaviour
     {
-        public EarthEnemyBehavior(XonixGrid grid) : base(NodeState.Sea, grid) { }
+        public EarthEnemyBehavior(XonixGrid grid) : base(NodeState.Earth, grid) { }
 
 
 

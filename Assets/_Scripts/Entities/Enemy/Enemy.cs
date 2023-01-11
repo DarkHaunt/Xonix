@@ -32,13 +32,13 @@ namespace Xonix.Entities
 
         protected override void MoveIntoNode(GridNode node)
         {
+            if (node.State == NodeState.Trail)
+                NotifyThatSteppedOnTrail();
+
             if (_behaviour.IsNodeHasBorderState(node))
                 SetMoveDirection(_behaviour.GetBounceDirection(Position, MoveDirection));
 
             transform.Translate(MoveTranslation);
-
-            if (node.State == NodeState.Trail)
-                NotifyThatSteppedOnTrail();
         }
 
         protected override void OnOutField() => SetMoveDirection(_behaviour.GetBounceDirection(Position, MoveDirection));

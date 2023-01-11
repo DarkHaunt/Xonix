@@ -12,7 +12,7 @@ namespace Xonix.Entities.EnemyComponents
     /// </summary>
     public abstract class EnemyBehaviour
     {
-        private readonly NodeState _borderNodeState;
+        private readonly NodeState _walkNodeState;
         private readonly XonixGrid _grid;
 
 
@@ -21,9 +21,9 @@ namespace Xonix.Entities.EnemyComponents
 
 
 
-        public EnemyBehaviour(NodeState borderNodeState, XonixGrid grid)
+        public EnemyBehaviour(NodeState walkNodeState, XonixGrid grid)
         {
-            _borderNodeState = borderNodeState;
+            _walkNodeState = walkNodeState;
             _grid = grid;
         }
 
@@ -59,7 +59,7 @@ namespace Xonix.Entities.EnemyComponents
             return new Vector2(currentDirection.x, -currentDirection.y);
         }
 
-        public bool IsNodeHasBorderState(GridNode node) => _borderNodeState == node.State;
+        public bool IsNodeHasBorderState(GridNode node) => node.State != _walkNodeState;
 
         private bool IsBorderInPosition(Vector2 position)
         {
