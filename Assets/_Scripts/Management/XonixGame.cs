@@ -31,12 +31,14 @@ namespace Xonix
         [SerializeField] private LevelHandler _levelHandler;
         [SerializeField] private EntitiesHandler _entitiesHandler;
 
-        private int _score = 0;
+        private ScoreCounter _scoreCounter;
 
 
 
         private async void Init()
         {
+            _scoreCounter = new ScoreCounter();
+
             // Camera alignment
             _mainCamera.transform.position = _grid.GetGridCenter();
             _mainCamera.transform.position += new Vector3(0f, 0f, -10f);
@@ -51,8 +53,9 @@ namespace Xonix
             _entitiesHandler.Player.OnNodesCorrupted += (corruptedNodes) =>
             {
                 _grid.RemoveSeaNodes(corruptedNodes);
-                _score += corruptedNodes.Count;
-                _printUI.SetScoreNumber(_score);
+
+                _scoreCounter.AddScore(corruptedNodes.Count);
+                _printUI.SetScoreNumber(_scoreCounter.Score);
             };
 
             #endregion
@@ -87,6 +90,7 @@ namespace Xonix
             await gameOverSoundLoadingTask;
 
             OnGameOver += () => AudioManager2D.PlaySound(gameOverSoundLoadingTask.Result);
+            OnGameOver += _scoreCounter.TryToUpdateRecord;
         }
 
         private void EndGame()

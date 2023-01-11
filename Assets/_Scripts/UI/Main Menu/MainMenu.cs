@@ -1,8 +1,8 @@
-using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using Xonix.Scenes;
-using UnityEngine.SceneManagement;
 
 
 
@@ -12,16 +12,19 @@ namespace Xonix.UI
     {
         private const string GameScenePath = "Scenes/Game";
 
+
         [Header("--- Buttons ---")]
         [SerializeField] private Button _playButton;
 
-        [SerializeField] private TextMeshProUGUI _maxScoreNumberField;
+        [SerializeField] private TextMeshProUGUI _recordScoreNumberField;
 
 
 
         private void Init()
         {
             _playButton.onClick.AddListener(() => SceneLoader.LoadSceneWithTransition(GameScenePath, LoadSceneMode.Single));
+
+            _recordScoreNumberField.text = $"{ScoreCounter.GetRecordScore()}";
         }
 
 
