@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
+
+
 namespace Xonix.Audio
 {
     /// <summary>
-    /// A simple one-flow audio manager
+    /// Adapted for Xonix simple one-flow audio manager
     /// </summary>
     public class AudioManager2D : MonoBehaviour
     {
@@ -29,6 +31,10 @@ namespace Xonix.Audio
         [Header("--- Sound Sources ---")]
         [SerializeField] private AudioSource _musicSource;
         [SerializeField] private AudioSource _soundSource;
+
+        [Header("--- Init Music Clip ---")]
+        [SerializeField] private AudioClip _initMusicClip;
+
 
         private Dictionary<AudioMixerGroupType, AudioMixerGroupController> _audioMixerGroupControllers;
 
@@ -71,6 +77,8 @@ namespace Xonix.Audio
                 [AudioMixerGroupType.Music] = new AudioMixerGroupController(MusicVolumeExposedParameterName, _musicMixerGroup),
                 [AudioMixerGroupType.Sound] = new AudioMixerGroupController(SoundVolumeExposedParameterName, _soundMixerGroup),
             };
+
+            PlayMusic(_initMusicClip);
 
             DontDestroyOnLoad(gameObject);
         }

@@ -95,6 +95,8 @@ namespace Xonix
 
             _gameOverClip = gameOverSoundLoadingTask.Result;
 
+            /// TODO: Не вызывается при выходе из уровня
+            /// Нужно чтобы как минимум вызывалось обновление счёта;
             OnGameOver += _scoreCounter.TryToUpdateRecord;
         }
 
@@ -112,14 +114,6 @@ namespace Xonix
             yield return new WaitForSeconds(GameOverDelaySeconds);
 
             SceneLoader.LoadMainMenu();
-
-/*#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
-
-#if UNITY_ANDROID_API
-            Application.Quit();
-#endif*/
         }
 
 

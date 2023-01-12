@@ -70,7 +70,10 @@ namespace Xonix.UI
 
             if (_animation.isPlaying)
             {
-                print($"Animation component in {gameObject.name} is playing clip, so you can't play another until clip will end");
+#if UNITY_EDITOR
+
+                print($"Animation component in {gameObject.name} is playing clip, so you can't play another until clip will end"); 
+#endif
                 await Task.FromCanceled(CancellationToken.None);
             }
 
@@ -80,7 +83,8 @@ namespace Xonix.UI
 
             await WaitUntilPlayingEnds();
 
-            gameObject.SetActive(false);
+            if (Application.isPlaying)
+                gameObject.SetActive(false);
         }
 
         private async Task WaitUntilPlayingEnds()

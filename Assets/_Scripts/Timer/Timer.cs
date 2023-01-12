@@ -9,7 +9,7 @@ namespace Xonix
     /// <summary>
     /// Simple disposable timer
     /// </summary>
-    public class Timer
+    public class Timer : IDisposable
     {
         private const int MillisecondsValue = 1000;
 
@@ -37,7 +37,7 @@ namespace Xonix
 
             _timerCountingCancellationTokenSource = new CancellationTokenSource();
 
-            XonixGame.OnGameOver += CancelTickCounting;
+            XonixGame.OnGameOver += Dispose;
 
             PauseMenu.OnPause += PauseTimer;
             PauseMenu.OnResume += ResumeTimer;
@@ -50,7 +50,7 @@ namespace Xonix
 
             _timerCountingCancellationTokenSource = new CancellationTokenSource();
 
-            XonixGame.OnGameOver += CancelTickCounting;
+            XonixGame.OnGameOver += Dispose;
 
             PauseMenu.OnPause += PauseTimer;
             PauseMenu.OnResume += ResumeTimer;
@@ -68,13 +68,13 @@ namespace Xonix
                 OnTickPassed?.Invoke();
             }
 
-            if (_timerCountingCancellationTokenSource.IsCancellationRequested)
-                return;
-
             OnTimerEnded?.Invoke();
         }
 
-        public void PauseTimer() => CancelTickCounting();
+        public void PauseTimer()
+        {
+            CancelTickCounting();
+        }
 
         public void ResumeTimer()
         {
@@ -95,6 +95,14 @@ namespace Xonix
         {
             _timerCountingCancellationTokenSource.Dispose();
             _timerCountingCancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public void Dispose()
+        {
+            CancelTickCounting();
+
+            PauseMenu.OnPause -= PauseTimer;
+            PauseMenu.OnResume -= ResumeTimer;
         }
     }
 }

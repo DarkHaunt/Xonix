@@ -29,14 +29,6 @@ MonoBehaviour:
     m_Address: Grid/NodeSource/SeaNodeSource
     m_ReadOnly: 0
     m_SerializedLabels: []
-  - m_GUID: 2cda990e2423bbf4892e6590ba056729
-    m_Address: Scenes/Game
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: b366cc89504c5a14395e6f35afcea9ec
-    m_Address: Scenes/MainMenu
-    m_ReadOnly: 0
-    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c38081ef7bca42041b3d1f3ea4052918, type: 2}
   m_SchemaSet:

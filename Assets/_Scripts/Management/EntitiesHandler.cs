@@ -16,7 +16,7 @@ namespace Xonix.Entities
     public class EntitiesHandler : MonoBehaviour
     {
         private const int IndexOfFirstSeaEnemy = 1; // For sea enemy collection get
-        private const int StartCountOfSeaEnemies = 1;
+        private const int StartCountOfSeaEnemies = 3;
         private const float EntitiesMoveTimeDelaySeconds = 0.03f;
 
 
@@ -108,6 +108,11 @@ namespace Xonix.Entities
         private void OnDisable()
         {
             LevelHandler.OnLevelCompleted -= SpawnSeaEnemy;
+        }
+
+        private void OnDestroy()
+        {
+            _entitiesMovingDelayTimer.Dispose();
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine.UI;
 using UnityEngine;
+using Xonix.Scenes;
 
 
 
@@ -18,6 +19,7 @@ namespace Xonix
         [Header("--- Buttons ---")]
         [SerializeField] private Button _pauseButton;
         [SerializeField] private Button _resumeButton;
+        [SerializeField] private Button _exitButton;
 
 
 
@@ -27,6 +29,7 @@ namespace Xonix
 
             _pauseButton.onClick.AddListener(Pause);
             _resumeButton.onClick.AddListener(Resume);
+            _exitButton.onClick.AddListener(ExitToMainMenu);
         }
 
         private void Resume()
@@ -49,11 +52,20 @@ namespace Xonix
             OnPause?.Invoke();
         }
 
+        private void ExitToMainMenu()
+        {
+            _pauseButton.gameObject.SetActive(true); // Hide the pause button
+
+            Resume();
+            SceneLoader.LoadMainMenu();
+        }
+
         private void CheckForOnFocusPause(bool isFocused)
         {
             if (!isFocused) // If player losesd application focus - pause the game
                 Pause();
         }
+
 
 
 

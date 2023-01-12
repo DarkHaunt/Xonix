@@ -17,7 +17,7 @@ namespace Xonix.LevelHandling
 
         private const float TimerTickDurationInSeconds = 60f; // Timer counts minutes
         private const float GameEndTimeTicksCount = 90; // One and a half hour of max game time
-        private const float TargetSeaFieldCorruptionPercent = 0.05f; // A percent of corrupted sea field, when level will be completed
+        private const float TargetSeaFieldCorruptionPercent = 0.50f; // A percent of corrupted sea field, when level will be completed
 
         public static event Action OnLevelCompleted;
         public static event Action OnLevelLosen;
@@ -29,7 +29,7 @@ namespace Xonix.LevelHandling
 
         private Timer _levelEndTimer;
 
-        private int _levelNumber = 1;
+        private int _levelNumber = 3;
 
 
 
@@ -73,6 +73,13 @@ namespace Xonix.LevelHandling
             OnLevelCompleted?.Invoke();
 
             AudioManager2D.PlaySound(_levelCompleteClip);
+        }
+
+
+
+        private void OnDestroy()
+        {
+            _levelEndTimer.Dispose();
         }
     }
 }
