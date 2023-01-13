@@ -358,7 +358,6 @@ MonoBehaviour:
   _musicMixerGroup: {fileID: -2670813044709155196, guid: 6c362f610b8b7c84e86f8f33b677ef72, type: 2}
   _musicSource: {fileID: 899582883}
   _soundSource: {fileID: 406472792}
-  _initMusicClip: {fileID: 8300000, guid: 1c6906e814a1a004092628ab30f89284, type: 3}
 --- !u!4 &565792117
 Transform:
   m_ObjectHideFlags: 0
@@ -448,7 +447,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.7
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0

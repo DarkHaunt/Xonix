@@ -29,7 +29,7 @@ namespace Xonix.LevelHandling
 
         private Timer _levelEndTimer;
 
-        private int _levelNumber = 3;
+        private int _levelNumber = 1;
 
 
 
@@ -45,7 +45,7 @@ namespace Xonix.LevelHandling
 
             await levelUpSoundLoadingTask;
 
-            _levelCompleteClip = levelUpSoundLoadingTask.Result; // TODO: —ƒелать не анонимный метод дл€ отписки  
+            _levelCompleteClip = levelUpSoundLoadingTask.Result;
 
             _levelEndTimer = new Timer(TimerTickDurationInSeconds, GameEndTimeTicksCount);
 

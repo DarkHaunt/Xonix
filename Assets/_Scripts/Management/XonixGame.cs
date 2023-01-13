@@ -18,7 +18,6 @@ namespace Xonix
     /// </summary>
     public class XonixGame : MonoBehaviour
     {
-        private const string GameOverSoundPath = "Audio/Game/GameOverSound";
         private const float GameOverDelaySeconds = 1f;
 
         public static event Action OnGameOver;
@@ -33,8 +32,9 @@ namespace Xonix
         [SerializeField] private LevelHandler _levelHandler;
         [SerializeField] private EntitiesHandler _entitiesHandler;
 
-
-        private AudioClip _gameOverClip;
+        [Header("--- Audio ---")]
+        [SerializeField] private AudioClip _levelTheme;
+        [SerializeField] private AudioClip _gameOverClip;
 
         private ScoreCounter _scoreCounter;
 
@@ -42,6 +42,8 @@ namespace Xonix
 
         private async void Init()
         {
+            AudioManager2D.PlayMusic(_levelTheme);
+
             _scoreCounter = new ScoreCounter();
 
             // Camera alignment
@@ -89,14 +91,6 @@ namespace Xonix
 
             #endregion
 
-            var gameOverSoundLoadingTask = Addressables.LoadAssetAsync<AudioClip>(GameOverSoundPath).Task;
-
-            await gameOverSoundLoadingTask;
-
-            _gameOverClip = gameOverSoundLoadingTask.Result;
-
-            /// TODO: Не вызывается при выходе из уровня
-            /// Нужно чтобы как минимум вызывалось обновление счёта;
             OnGameOver += _scoreCounter.TryToUpdateRecord;
         }
 
@@ -125,7 +119,12 @@ namespace Xonix
 
         private void OnApplicationQuit()
         {
-            EndGame();
+            OnGameOver?.Invoke();
+        }      
+        
+        private void OnDestroy()
+        {
+            OnGameOver?.Invoke();
         }
     }
 }

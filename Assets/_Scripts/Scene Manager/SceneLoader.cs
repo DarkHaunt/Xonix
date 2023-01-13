@@ -16,7 +16,6 @@ namespace Xonix.Scenes
         // To avoid animation blicking for small scenes
         private const int MinimalLoadingScreenAnimationPlayingTimeMiliseconds = 1000;
         // List of general used scenes
-       // private const string MainMenuScenePath = "Scenes/Game";
         private const string MainMenuScenePath = "Scenes/MainMenu";
 
 
@@ -70,6 +69,7 @@ namespace Xonix.Scenes
             DontDestroyOnLoad(gameObject);
 
             _sceneLoadingCancellationSource = new CancellationTokenSource();
+
             Application.quitting += _sceneLoadingCancellationSource.Cancel;
 
             LoadSceneImmediately(MainMenuScenePath, LoadSceneMode.Single);

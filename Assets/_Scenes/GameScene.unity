@@ -426,7 +426,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -59.333252, y: -59.333252}
+  m_AnchoredPosition: {x: -59.333496, y: -59.333252}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &89336098
@@ -2080,6 +2080,8 @@ MonoBehaviour:
   _grid: {fileID: 2107759974}
   _levelHandler: {fileID: 2016519697}
   _entitiesHandler: {fileID: 1537684951}
+  _levelTheme: {fileID: 8300000, guid: 4abe4b3196d9cc74e9299354ac65b612, type: 3}
+  _gameOverClip: {fileID: 8300000, guid: 055887ec7f45748488f796eec62c4246, type: 3}
 --- !u!4 &1402016992
 Transform:
   m_ObjectHideFlags: 0

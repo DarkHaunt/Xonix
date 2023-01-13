@@ -21,10 +21,6 @@ MonoBehaviour:
     m_Address: Audio/Player/DeathSound
     m_ReadOnly: 0
     m_SerializedLabels: []
-  - m_GUID: 055887ec7f45748488f796eec62c4246
-    m_Address: Audio/Game/GameOverSound
-    m_ReadOnly: 0
-    m_SerializedLabels: []
   - m_GUID: b3c75816db232294cbca9c4cfb843749
     m_Address: Audio/Game/LevelPassSound
     m_ReadOnly: 0

@@ -154,6 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playButton: {fileID: 490769893}
   _recordScoreNumberField: {fileID: 1361199641}
+  _mainMusic: {fileID: 8300000, guid: 1b9b9ae1d0d1e174291fb10154cd9b0a, type: 3}
 --- !u!4 &144784491
 Transform:
   m_ObjectHideFlags: 0
@@ -166,7 +167,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &272282109
 GameObject:
@@ -652,7 +653,7 @@ RectTransform:
   - {fileID: 490769892}
   - {fileID: 1717823468}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1191,7 +1192,7 @@ RectTransform:
   - {fileID: 2061577789}
   - {fileID: 409971008}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1461,7 +1462,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -98.1, y: -58.7}
+  m_AnchoredPosition: {x: -98.1001, y: -58.69995}
   m_SizeDelta: {x: 176.8996, y: 94.8458}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1717823469

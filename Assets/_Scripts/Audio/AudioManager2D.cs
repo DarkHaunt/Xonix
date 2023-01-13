@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using Xonix.UI;
 
 
 
@@ -31,10 +32,7 @@ namespace Xonix.Audio
         [Header("--- Sound Sources ---")]
         [SerializeField] private AudioSource _musicSource;
         [SerializeField] private AudioSource _soundSource;
-
-        [Header("--- Init Music Clip ---")]
-        [SerializeField] private AudioClip _initMusicClip;
-
+        
 
         private Dictionary<AudioMixerGroupType, AudioMixerGroupController> _audioMixerGroupControllers;
 
@@ -70,6 +68,18 @@ namespace Xonix.Audio
             _instance._audioMixerGroupControllers[mixerGroupType].ChangeVolume(DefaultDbVolumeValue);
         }
 
+        private void PauseAudio()
+        {
+            _musicSource.Pause();
+            _soundSource.Pause();
+        }
+
+        private void ResumeAudio()
+        {
+            _musicSource.Play();
+            _soundSource.Play();
+        }
+
         private void Init()
         {
             _audioMixerGroupControllers = new Dictionary<AudioMixerGroupType, AudioMixerGroupController>()
@@ -78,7 +88,8 @@ namespace Xonix.Audio
                 [AudioMixerGroupType.Sound] = new AudioMixerGroupController(SoundVolumeExposedParameterName, _soundMixerGroup),
             };
 
-            PlayMusic(_initMusicClip);
+            PauseMenu.OnPause += PauseAudio;
+            PauseMenu.OnResume += ResumeAudio;
 
             DontDestroyOnLoad(gameObject);
         }
@@ -100,6 +111,12 @@ namespace Xonix.Audio
             #endregion
 
             Init();
+        }
+
+        private void OnDestroy()
+        {
+            PauseMenu.OnPause -= PauseAudio;
+            PauseMenu.OnResume -= ResumeAudio;
         }
 
 
