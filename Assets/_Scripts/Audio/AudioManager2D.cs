@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-using Xonix.UI;
 
 
 
@@ -76,8 +75,8 @@ namespace Xonix.Audio
 
         private void ResumeAudio()
         {
-            _musicSource.Play();
-            _soundSource.Play();
+            _musicSource.UnPause();
+            _soundSource.UnPause();
         }
 
         private void Init()

@@ -32,5 +32,5 @@ namespace Xonix.Grid
         {
             _spriteRenderer = GetComponent<SpriteRenderer>();
         }
-    } 
+    }
 }

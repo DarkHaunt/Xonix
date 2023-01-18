@@ -35,7 +35,7 @@ namespace Xonix.Entities
 
         protected abstract void ResetPosition();
 
-        public virtual void Init(Vector2 initPosition, Sprite sprite, XonixGrid grid)
+        protected void InitEntity(Vector2 initPosition, Sprite sprite, XonixGrid grid)
         {
             _spriteRenderer = GetComponent<SpriteRenderer>();
             _spriteRenderer.sprite = sprite;

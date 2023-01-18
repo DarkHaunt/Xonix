@@ -16,9 +16,7 @@ namespace Xonix.Entities.EnemyComponents
         private readonly XonixGrid _grid;
 
 
-
         protected XonixGrid Grid => _grid;
-
 
 
         public EnemyBehaviour(NodeState walkNodeState, XonixGrid grid)
@@ -47,7 +45,7 @@ namespace Xonix.Entities.EnemyComponents
             if (firstNeighbourNodeIsBorder && secondNeighbourNodeIsBorder)
                 return currentDirection * new Vector2(-1f, -1f);
 
-            // IF moving ON angle - bounce in opposite direction
+            // If moving ON angle - bounce in opposite direction
             if (!firstNeighbourNodeIsBorder && !secondNeighbourNodeIsBorder)
                 return currentDirection * new Vector2(-1f, -1f);
 

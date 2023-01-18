@@ -45,7 +45,7 @@ namespace Xonix.Entities
         {
             _initPosition = grid.GetFieldTopCenterPosition();
 
-            base.Init(_initPosition, sprite, grid);
+            InitEntity(_initPosition, sprite, grid);
 
             _trailMarker = new TrailMarker();
             _corrupter = new Corrupter(grid, seaEnemeies);

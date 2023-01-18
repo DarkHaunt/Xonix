@@ -19,15 +19,10 @@ namespace Xonix.Entities
         {
             _behaviour = spawnData.Behavior;
 
-            Init(_behaviour.GetInitPosition(), spawnData.Sprite, grid);
-        }
-
-        public override void Init(Vector2 initPosition, Sprite sprite, XonixGrid grid)
-        {
             var randomMoveDirection = new Vector2(GetRandomSign(), GetRandomSign());
             SetMoveDirection(randomMoveDirection);
 
-            base.Init(initPosition, sprite, grid);
+            InitEntity(_behaviour.GetInitPosition(), spawnData.Sprite, grid);
         }
 
         protected override void MoveIntoNode(GridNode node)
